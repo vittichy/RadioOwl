@@ -55,7 +55,13 @@ namespace vt.Extensions
         }
 
 
-
+        /// <summary>
+        /// percent from total as string
+        /// </summary>
+        /// <param name="value">value</param>
+        /// <param name="total">total = 100%</param>
+        /// <param name="formatString">format string</param>
+        /// <returns></returns>
         public static string ToPercentFromTotal(this long value, long total, string formatString = "0.##")
         {
             var percent = (total > 0) ? (((float)value / total) * 100) : 0;
