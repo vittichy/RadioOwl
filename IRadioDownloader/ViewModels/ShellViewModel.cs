@@ -1,12 +1,12 @@
 ﻿using HtmlAgilityPack;
 using RadioOwl.Data;
-using RadioOwl.Data.TagLibExtension;
+using RadioOwl.Id3;
+using RadioOwl.Radio;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using TagLib;
 using vt.Extensions;
 using vt.Http;
 
@@ -16,19 +16,7 @@ namespace RadioOwl.ViewModels
     {
         #region Consts
         
-        // typy odkazu na porad z hlavni stranky: http://hledani.rozhlas.cz/iradio/
-        //
-        // Prehrat:  http://prehravac.rozhlas.cz/audio/3680166                      - je u vsech poradu i tam, kde neni nabizen download, musim tedy s odkazu stahnout html playeru a z nej ziskat odkaz?
-        // Stahnout: http://media.rozhlas.cz/_download/3680166.mp3                  - normalni download
-        // Podcast:  http://www2.rozhlas.cz/podcast/podcast_porady.php?p_po=293     - nezajima mne
-
-        private const string URL_BEGINNING_PLAY     = @"http://prehravac.rozhlas.cz/audio/";    // odkaz na stream - skutecnou adresu k mp3 musi vykousat z html stranky
-        private const string URL_BEGINNING_DOWNLOAD = @"http://media.rozhlas.cz/_download/";    // primo odkaz na mp3
-
         private const string DRAG_DROP_FORMAT = "UnicodeText";
-
-        private const string URL_IRADIO_STREAM = @"http://media.rozhlas.cz/_audio/{0}.mp3";     // url iradio streamu kdyz uz vim ID poradu
-
         private const int FILENAME_MAX_LEN = 150;
 
         #endregion
@@ -42,9 +30,41 @@ namespace RadioOwl.ViewModels
         public string Title { get { return string.Format("RadioOwl {0}", System.Reflection.Assembly.GetExecutingAssembly()?.GetName()?.Version); } }
 
         public ObservableCollection<FileRow> Files { get; set; }
-        public FileRow SelectedRow { get; set; }
 
+        private FileRow _selectedRow;
+        public FileRow SelectedRow
+        {
+            get { return _selectedRow; }
+            set
+            {
+                _selectedRow = value;
+                NotifyOfPropertyChange(() => SelectedRow);
+                NotifyOfPropertyChange(() => CanSniffAround);
+                NotifyOfPropertyChange(() => CanPlayRow);
+                NotifyOfPropertyChange(() => CanDeleteRow);
+            }
+        }
+        
         public TotalProgress TotalProgress { get; set; }
+
+        /// <summary>
+        /// selected radek je Finnished a ulozen na disk
+        /// </summary>
+        public bool SelectedRowIsSaved { get { return ((SelectedRow != null) && (SelectedRow.State == FileRowState.Finnished) && !string.IsNullOrEmpty(SelectedRow.SavedFileName)); } }
+
+        #endregion
+
+
+        #region Properties-CanExecute
+
+        /// <summary>
+        /// can execute akce pro metodu SniffAround() - v caliburnu to lze resit nejen metodou, ale i pres takovouhle property, coz ma vyhodu v tom, ze ji lze odpalit v NotifyOfPropertyChange!
+        /// </summary>
+        public bool CanSniffAround { get { return (SelectedRow != null); } }
+
+        public bool CanPlayRow { get { return SelectedRowIsSaved; } }
+
+        public bool CanDeleteRow { get { return (SelectedRow != null); } }
 
         #endregion
 
@@ -62,20 +82,26 @@ namespace RadioOwl.ViewModels
 
         #region Methods
 
+        /// <summary>
+        /// akce prehrani aktualniho zaznamu
+        /// </summary>
         public void PlayRow()
         {
-            if ((SelectedRow != null) && (SelectedRow.State == FileRowState.Finnished) && !string.IsNullOrEmpty(SelectedRow.SavedFileName))
+            if (CanPlayRow)
             {
                 System.Diagnostics.Process.Start(SelectedRow.SavedFileName);
             }
         }
 
 
+        /// <summary>
+        /// smazani aktualniho radku
+        /// </summary>
         public void DeleteRow()
         {
-            if ((SelectedRow != null) && (SelectedRow.State != FileRowState.Started)) // nastartovany task by bylo nutne cancelovat, to zatim neresim
+            if (CanDeleteRow) // nastartovany task by bylo nutne cancelovat, to zatim neresim
             {
-                var messageBoxResult = MessageBox.Show("Opravdu smazat?", "Potvrzení", MessageBoxButton.YesNo);
+                var messageBoxResult = MessageBox.Show("Opravdu smazat?", "Potvrzení", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (messageBoxResult == MessageBoxResult.Yes)
                 {
                     Files.Remove(SelectedRow);
@@ -90,7 +116,7 @@ namespace RadioOwl.ViewModels
             var url = GetPageUrl(e);
             if (!string.IsNullOrEmpty(url))
             {
-                ProcessDropedUrl(url);
+                ProcessUrl(url);
             }
         }
 
@@ -110,11 +136,47 @@ namespace RadioOwl.ViewModels
             }
         }
 
+
+        /// <summary>
+        /// akce Načíst z URL
+        /// </summary>
+        public void OpenUrl()
+        {
+            var url = InputBoxViewModel.ExecuteModal("Načíst z URL", "URL:");
+            if (!string.IsNullOrEmpty(url))
+            {
+                if (RadioHelpers.IsUrlToIRadio(url))
+                {
+                    ProcessUrl(url);
+                }
+                else
+                {
+                    MessageBox.Show("Neznámý typ URL.", "Chyba");
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// spusteni formulare s prohledanim okolnich ID (Očuchat okolní ID)
+        /// </summary>
+        public void SniffAround()
+        {
+            if (CanSniffAround)
+            {
+                var urlStreams = SniffAroundViewModel.ExecuteModal(SelectedRow?.Url);
+                urlStreams?.ForEach(p => ProcessUrl(p));
+            }
+        }
+
         #endregion
 
 
         #region Methods-Private
 
+        /// <summary>
+        /// v DragEventArgs dokaze najit zpracovatelne Url
+        /// </summary>
         private string GetPageUrl(DragEventArgs e)
         {
             if ((e != null) && (e.Data != null))
@@ -122,7 +184,7 @@ namespace RadioOwl.ViewModels
                 if (e.Data.GetDataPresent(DRAG_DROP_FORMAT))
                 {
                     var url = (e.Data.GetData(DRAG_DROP_FORMAT) as string);
-                    if (IsUrlToMp3Stream(url) || IsUrlToPage(url))
+                    if (RadioHelpers.IsUrlToIRadio(url)) 
                     {
                         return url;
                     }
@@ -132,21 +194,31 @@ namespace RadioOwl.ViewModels
         }
 
 
-        private bool IsUrlToMp3Stream(string url)
+        /// <summary>
+        /// zahaji zpracovani url
+        /// </summary>
+        private void ProcessUrl(StreamUrlRow streamUrlRow)
         {
-            return (!string.IsNullOrEmpty(url) && url.StartsWith(URL_BEGINNING_DOWNLOAD, StringComparison.InvariantCultureIgnoreCase));
+            var fileRow = new FileRow(streamUrlRow);
+            ProcessUrlRow(fileRow, fileRow.Url);
         }
 
 
-        private bool IsUrlToPage(string url)
-        {
-            return (!string.IsNullOrEmpty(url) && url.StartsWith(URL_BEGINNING_PLAY, StringComparison.InvariantCultureIgnoreCase));
-        }
-
-
-        private void ProcessDropedUrl(string url)
+        /// <summary>
+        /// zahaji zpracovani url
+        /// </summary>
+        private void ProcessUrl(string url)
         {
             var fileRow = new FileRow(url);
+            ProcessUrlRow(fileRow, url);
+        }
+
+
+        /// <summary>
+        /// zahaji zpracovani radku pro dotazenou url
+        /// </summary>
+        private void ProcessUrlRow(FileRow fileRow, string url)
+        {
             Files.Insert(0, fileRow);
             fileRow.AddLog("Stahuji stránku pořadu.", FileRowState.Started);
 
@@ -156,17 +228,17 @@ namespace RadioOwl.ViewModels
 
         private void StartDownload(FileRow fileRow, string url)
         {
-            if (IsUrlToMp3Stream(url))
+            if (RadioHelpers.IsUrlToIRadioDownload(url))
             {
                 DownloadMp3Stream(fileRow, url);
             }
-            else if (IsUrlToPage(url))
+            else if (RadioHelpers.IsUrlToIRadioPlayPage(url))
             {
                 StartDownloadFromPageUrl(fileRow, url);
             }
             else
             {
-                fileRow.AddLog(string.Format("Neznáme url: {0}.", url));
+                fileRow.AddLog(string.Format("Neznámé url: {0}.", url));
             }
         }
 
@@ -218,9 +290,7 @@ namespace RadioOwl.ViewModels
                     return;
                 }
 
-                var streamUrl = string.Format(URL_IRADIO_STREAM, fileRow.Id);
-                fileRow.AddLog(string.Format("Stahuji stream: {0}", streamUrl));
-
+                var streamUrl = RadioHelpers.GetIRadioMp3Url(fileRow.Id);
                 DownloadMp3Stream(fileRow, streamUrl);
             }
             catch (Exception ex)
@@ -232,6 +302,8 @@ namespace RadioOwl.ViewModels
 
         private async void DownloadMp3Stream(FileRow fileRow, string streamUrl)
         {
+            fileRow.AddLog(string.Format("Stahuji stream: {0}", streamUrl));
+
             var asyncDownloader = new AsyncDownloader();
             var output = await asyncDownloader.GetData(streamUrl,
                                                        p =>
@@ -253,7 +325,7 @@ namespace RadioOwl.ViewModels
 
         private void SaveMp3(FileRow fileRow, byte[] data) 
         {
-            var id3CommentTag = GetId3TagComment(data);
+            var id3CommentTag = Id3Helper.GetId3TagComment(data);
             var newFileNameOk = GetUniqSaveName(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), id3CommentTag, "mp3");
 
             using (var file = new FileStream(newFileNameOk, FileMode.Create, FileAccess.Write))
@@ -261,6 +333,10 @@ namespace RadioOwl.ViewModels
                 file.Write(data, 0, data.Length);
             }
             fileRow.SavedFileName = newFileNameOk;
+            if (string.IsNullOrEmpty(fileRow.Title))
+            {
+                fileRow.Title = id3CommentTag;
+            }
             fileRow.AddLog(string.Format("Uložen soubor: {0}", newFileNameOk), FileRowState.Finnished);
         }
 
@@ -284,54 +360,32 @@ namespace RadioOwl.ViewModels
             return fullPathFilename;
         }
 
-        
-        private static string FindAttributeValue(HtmlDocument htmlDoc, string xPathNode, string attributeName)
-        {
-            var node = htmlDoc.DocumentNode.SelectNodes(xPathNode).FirstOrDefault();
-            if (node != null)
-            {
-                var att = node.Attributes.FirstOrDefault(p => p.Name == attributeName);
-                if (att != null)
-                {
-                    return att.Value;
-                }
-            }
-            return null;
-        }
-
 
         /// <summary>
-        /// pokud stahuju jen stream bez html stranky poradu, nezmam z html vykousle popisy poradu, takze bud vzdy koukat do mp3, kde to je pekne popsane
-        /// zatim se zda nejvhodnejsi tag Comment
-        /// ostatni tagy jsou cca takto:
-        ///     Album: "Hovory (2016-10-28)"
-        ///     Comment: "Hovory - 28.10.2016 02:40 - Narodni muzeum je fenomen ceske historie. Strileli po nem sovetsti vojaci v roce 1968. Dnes se do nej dobyvaji turiste, i kdyz je budova v rekonstrukci. Jake to je v takove budove delat generalniho reditele? Hostem Miroslava Dittricha byl Michal Lukes."
-        ///     Copyright: "2016 Cesky rozhlas"
-        ///     FirstArtist: "Hovory (28.10.2016) - Miroslav Dittrich - CRo Plus"
-        ///     FirstComposer: "Miroslav Dittrich"
-        ///     FirstPerformer: "Hovory (28.10.2016) - Miroslav Dittrich - CRo Plus"
-        ///     JoinedArtists: "Hovory (28.10.2016) - Miroslav Dittrich - CRo Plus"
-        ///     JoinedComposers: "Miroslav Dittrich"
-        ///     JoinedPerformers: "Hovory (28.10.2016) - Miroslav Dittrich - CRo Plus"
-        ///     Title: "Narodni muzeum je fenomen ceske historie. Strileli po nem sovetsti vojaci v roce 1968. Dnes se do nej dobyvaji turiste, i kdyz je budova v rekonstrukci. Jake to je v takove budove delat generalniho reditele? Hostem Miroslava Dittricha byl Michal Lukes."
+        /// zkousi dohledat atribut od html elemetu dohledaneho pres xPath
         /// </summary>
-        private string GetId3TagComment(byte[] data)
+        /// <param name="htmlDoc">html dokument</param>
+        /// <param name="xPathNode">xPath pro dohledani elementu</param>
+        /// <param name="attributeName">jmeno hledaneho atributu</param>
+        /// <returns>hodnota hledaneho atributu</returns>
+        private static string FindAttributeValue(HtmlDocument htmlDoc, string xPathNode, string attributeName)
         {
-            if (data?.Length > 0)
+            var xpathNodes = htmlDoc.DocumentNode.SelectNodes(xPathNode);
+            if (xpathNodes != null)
             {
-                using (var memoStream = new MemoryStream(data))
+                var node = xpathNodes.FirstOrDefault();
+                if (node != null)
                 {
-                    var simpleFileAbstraction = new SimpleFileAbstraction(memoStream);
-                    var tagLibFile = TagLib.File.Create(simpleFileAbstraction, "taglib/mp3", ReadStyle.None);
-                    if (tagLibFile?.Tag != null)
+                    var att = node.Attributes.FirstOrDefault(p => p.Name == attributeName);
+                    if (att != null)
                     {
-                        return tagLibFile.Tag.Comment ?? tagLibFile.Tag.Title;
+                        return att.Value;
                     }
                 }
             }
             return null;
         }
-
+               
         #endregion
     }
 }

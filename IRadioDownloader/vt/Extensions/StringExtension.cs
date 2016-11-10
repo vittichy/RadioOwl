@@ -78,6 +78,16 @@ namespace vt.Extensions
         }
 
 
+        public static string SusbstringFromLastChar(this string value, char ch)
+        {
+            int chIndex = value.LastIndexOf(ch);
+            if ((chIndex > 0) && ((chIndex + 1) < value.Length))
+            {
+                return value.Substring(chIndex + 1, value.Length - chIndex - 1);
+            }
+            return string.Empty;
+        }
+
         public static Tuple<string, string> SplitBy(this string value, char ch)
         {
             var tuple = new Tuple<string, string>(value.SusbstringToChar(ch), value.SusbstringFromChar(ch));
@@ -93,6 +103,21 @@ namespace vt.Extensions
                 value = value.Replace(invalid, charToReplace);
             }
             return value;
+        }
+
+
+
+        public static string IncrementStringNumber(this string value, int i)
+        {
+            int number;
+            if(int.TryParse(value, out number))
+            {
+                number += i;
+                var format = string.Format("D{0}", value.Length);
+                var result = number.ToString(format);
+                return result;
+            }
+            return null;
         }
 
     }

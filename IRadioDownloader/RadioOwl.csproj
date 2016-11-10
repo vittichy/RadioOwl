@@ -26,7 +26,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>6</ApplicationRevision>
+    <ApplicationRevision>7</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -141,13 +141,28 @@
     <Compile Include="Data\FileRow.cs" />
     <Compile Include="Data\FileRowState.cs" />
     <Compile Include="Data\PropertyChangedBase.cs" />
-    <Compile Include="Data\TagLibExtension\SimpleFile.cs" />
-    <Compile Include="Data\TagLibExtension\SimpleFileAbstraction.cs" />
+    <Compile Include="Data\StreamUrlRow.cs" />
+    <Compile Include="Data\StreamUrlRowState.cs" />
+    <Compile Include="Id3\TagLibExtension\SimpleFile.cs" />
+    <Compile Include="Id3\TagLibExtension\SimpleFileAbstraction.cs" />
     <Compile Include="Data\TotalProgress.cs" />
+    <Compile Include="Id3\Id3Helper.cs" />
+    <Compile Include="Radio\RadioHelpers.cs" />
+    <Compile Include="ViewModels\InputBoxViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
+    <Compile Include="ViewModels\SniffAroundViewModel.cs" />
+    <Compile Include="Views\Extension\FocusExtension.cs" />
+    <Compile Include="Views\InputBoxView.xaml.cs">
+      <DependentUpon>InputBoxView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\SniffAroundView.xaml.cs">
+      <DependentUpon>SniffAroundView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="vt\Extensions\ExceptionExtensions.cs" />
+    <Compile Include="vt\Extensions\ListExtension.cs" />
     <Compile Include="vt\Extensions\LongExtensions.cs" />
     <Compile Include="vt\Extensions\StringExtension.cs" />
     <Compile Include="vt\Http\AsyncDownloader.cs" />
@@ -157,9 +172,18 @@
     </Compile>
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="vt\Http\AsyncDownloaderOutput.cs" />
+    <Compile Include="WPF\DataGridExtender.cs" />
+    <Page Include="Views\InputBoxView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ShellView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\SniffAroundView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -213,6 +237,16 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="icons\glyphicons-201-download.png" />
+    <Resource Include="icons\glyphicons-281-settings.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="icons\glyphicons-10-magic.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="icons\glyphicons-195-question-sign.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

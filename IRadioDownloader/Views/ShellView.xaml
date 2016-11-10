@@ -11,6 +11,30 @@
         Height="350" Width="1200" >
 
     <DockPanel LastChildFill="True">
+        
+        <ToolBarTray DockPanel.Dock="Top">
+            <ToolBar Height="36">
+                <Button cal:Message.Attach="OpenUrl" >
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/RadioOwl;component/icons/glyphicons-201-download.png" />
+                        <TextBlock VerticalAlignment="Center" Margin="3,0,10,0" >Načíst z URL</TextBlock>
+                    </StackPanel>
+                </Button>
+                <Button Name="SniffAround" >
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/RadioOwl;component/icons/glyphicons-10-magic.png" />
+                        <TextBlock VerticalAlignment="Center" Margin="3,0,10,0" >Očuchat okolní ID</TextBlock>
+                    </StackPanel>
+                </Button>
+                <!--<Button Name="OpenSettings" IsEnabled="False">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/RadioOwl;component/icons/glyphicons-281-settings.png" />
+                        <TextBlock VerticalAlignment="Center" Margin="3,0,10,0" >Nastavení</TextBlock>
+                    </StackPanel>
+                </Button>-->
+            </ToolBar>
+        </ToolBarTray>
+        
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -43,9 +67,6 @@
             </StatusBarItem>
         </StatusBar>
 
-        <!--test only-->
-        <!--<Button DockPanel.Dock="Top" Height="20" cal:Message.Attach="[Event Click] = [Action Click]" />-->
-
         <DataGrid DockPanel.Dock="Top" 
                   x:Name="DataGridStreams" 
                   AutoGenerateColumns="False" 
@@ -77,7 +98,7 @@
                         <DataTemplate>
                             <Grid >
                                 <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress,Mode=OneWay}" Foreground="{Binding StateColor, Mode=OneWay}"  />
-                                <TextBlock Text="{Binding ProgressPercent,Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Foreground="Black" Text="{Binding ProgressPercent,Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Grid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

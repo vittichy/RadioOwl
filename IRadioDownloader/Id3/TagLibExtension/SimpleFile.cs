@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace RadioOwl.Data.TagLibExtension
+namespace RadioOwl.Id3.TagLibExtension
 {
     /// <summary>
     /// pomocna pro napojeni TagLib na stream

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -7,6 +10,7 @@ namespace vt.Http
 {
     /// <summary>
     /// jednoduche async stazeni dat z url
+    /// ! vetsi pocet soubeznych spojeni je potreba nastavi rucne, napr v app.configu - connectionManagement,maxconnection="5" - default jsou pouze 2 spojeni !
     /// </summary>
     public class AsyncDownloader
     {
@@ -40,6 +44,34 @@ namespace vt.Http
             }
             return new AsyncDownloaderOutput<string>(data.Exception);
         }
+
+
+
+        /// <summary>
+        /// stazeni pouze casti zdrojoveho souboru (musi podporovat server na druhe strane)
+        /// </summary>
+        public async Task<AsyncDownloaderOutput<Stream>> GetDataRange(string url, long? rangeFrom, long? rangeTo)
+        {
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Range = new RangeHeaderValue(rangeFrom, rangeTo);
+
+                    var response = await client.GetAsync(url);
+                    response.EnsureSuccessStatusCode();
+                    var responseStream = await response.Content.ReadAsStreamAsync(); 
+                    var output = new AsyncDownloaderOutput<Stream>(responseStream);
+                    return output;
+                }
+            }
+            catch (Exception ex)
+            {
+                return new AsyncDownloaderOutput<Stream>(ex);
+            }
+        }
+
     }
 }
+
    

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Media;
 using vt.Extensions;
 
@@ -169,6 +168,11 @@ namespace RadioOwl.Data
             State = FileRowState.Started;
             LogList = new List<string>();
             Url = url;
+        }
+
+        public FileRow(StreamUrlRow streamUrlRow) : this(streamUrlRow?.Url)
+        {
+            Title = streamUrlRow?.Title;
         }
 
 
