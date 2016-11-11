@@ -143,6 +143,7 @@
     <Compile Include="Data\PropertyChangedBase.cs" />
     <Compile Include="Data\StreamUrlRow.cs" />
     <Compile Include="Data\StreamUrlRowState.cs" />
+    <Compile Include="Id3\Id3Tags.cs" />
     <Compile Include="Id3\TagLibExtension\SimpleFile.cs" />
     <Compile Include="Id3\TagLibExtension\SimpleFileAbstraction.cs" />
     <Compile Include="Data\TotalProgress.cs" />

@@ -1,11 +1,9 @@
-﻿using HtmlAgilityPack;
-using RadioOwl.Data;
+﻿using RadioOwl.Data;
 using RadioOwl.Id3;
 using RadioOwl.Radio;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using vt.Extensions;
 using vt.Http;
@@ -60,7 +58,7 @@ namespace RadioOwl.ViewModels
         /// <summary>
         /// can execute akce pro metodu SniffAround() - v caliburnu to lze resit nejen metodou, ale i pres takovouhle property, coz ma vyhodu v tom, ze ji lze odpalit v NotifyOfPropertyChange!
         /// </summary>
-        public bool CanSniffAround { get { return (SelectedRow != null); } }
+        public bool CanSniffAround { get { return ((SelectedRow != null) && !string.IsNullOrEmpty(SelectedRow.Id)); } }
 
         public bool CanPlayRow { get { return SelectedRowIsSaved; } }
 
@@ -164,7 +162,7 @@ namespace RadioOwl.ViewModels
         {
             if (CanSniffAround)
             {
-                var urlStreams = SniffAroundViewModel.ExecuteModal(SelectedRow?.Url);
+                var urlStreams = SniffAroundViewModel.ExecuteModal(SelectedRow?.Id);
                 urlStreams?.ForEach(p => ProcessUrl(p));
             }
         }
@@ -195,7 +193,7 @@ namespace RadioOwl.ViewModels
 
 
         /// <summary>
-        /// zahaji zpracovani url
+        /// zahaji zpracovani url - volani ze SniffView se seznamem vybranych ID
         /// </summary>
         private void ProcessUrl(StreamUrlRow streamUrlRow)
         {
@@ -230,11 +228,11 @@ namespace RadioOwl.ViewModels
         {
             if (RadioHelpers.IsUrlToIRadioDownload(url))
             {
-                DownloadMp3Stream(fileRow, url);
+                StartDownloadFromDownloadUrl(fileRow, url);
             }
             else if (RadioHelpers.IsUrlToIRadioPlayPage(url))
             {
-                StartDownloadFromPageUrl(fileRow, url);
+                StartDownloadFromStreamUrl(fileRow, url);
             }
             else
             {
@@ -243,74 +241,103 @@ namespace RadioOwl.ViewModels
         }
 
 
-        private async void StartDownloadFromPageUrl(FileRow fileRow, string url)
+        private void StartDownloadFromDownloadUrl(FileRow fileRow, string url)
         {
-            var asyncDownloader = new AsyncDownloader();
-            var output = await asyncDownloader.GetString(url);
-            if (output.DownloadOk)
+            fileRow.Url = url;
+            fileRow.Id = RadioHelpers.GetStreamIdFromUrl(fileRow.Url);
+            DownloadMp3Stream(fileRow);
+        }
+
+
+        private void StartDownloadFromStreamUrl(FileRow fileRow, string streamUrl)
+        {
+            fileRow.Id = RadioHelpers.GetStreamIdFromUrl(streamUrl);
+            if (!string.IsNullOrEmpty(fileRow.Id))
             {
-                ParseIRadioHtmlPage(fileRow, output.Output);
+                fileRow.Url = RadioHelpers.GetIRadioMp3Url(fileRow.Id);
+                DownloadMp3Stream(fileRow);
             }
             else
             {
-                fileRow.AddLog(string.Format("Chyba při stahování stránku pořadu: {0}.", output.Exception?.Message));
-            }
-        }
-
-        
-        /// <summary>
-        /// rozparsovani html stranky poradu
-        /// </summary>
-        private void ParseIRadioHtmlPage(FileRow fileRow, string html) 
-        {
-            try
-            {
-                // html nemusi byt validni xml, takze je potreba pro parsovani pouzit Html Agility Pack, viz http://htmlagilitypack.codeplex.com/
-                // http://www.c-sharpcorner.com/UploadFile/9b86d4/getting-started-with-html-agility-pack/
-                var htmlDoc = new HtmlDocument();
-                htmlDoc.LoadHtml(html);
-
-                // <div id="player-track" class="player uniplayer" data-mode="audio" data-type="ondemand" data-autostart="1" data-id="3696063" data-event_label="Glosa [3696063]" data-duration="99" data-primary="html5" data-debug="1"></div>
-                fileRow.Id = FindAttributeValue(htmlDoc, @"//div[@id='player-track']", "data-id");
-
-                // <meta name="og:title" content="Dvojka - Glosa (01.09.2016 06:22)">
-                fileRow.StreamName = FindAttributeValue(htmlDoc, @"//meta[@name='og:title']", "content");
-
-                // <p title="Marie Procházková: Paralínek (1/6). Paralínek se učí létat. Malý ptáček Paralínek bydlí v hnízdě ...
-                fileRow.Title = FindAttributeValue(htmlDoc, @"//body//div/p[@title]", "title");
-
-                if (string.IsNullOrEmpty(fileRow.Id))
-                {
-                    fileRow.AddLog("Chyba při parsování stránky pořadu - nepodařilo se dohledat ID streamu.", FileRowState.Error);
-                    return;
-                }
-                if (string.IsNullOrEmpty(fileRow.StreamName))
-                {
-                    fileRow.AddLog("Chyba při parsování stránky pořadu - nepodařilo se dohledat TITLE pořadu.", FileRowState.Error);
-                    return;
-                }
-
-                var streamUrl = RadioHelpers.GetIRadioMp3Url(fileRow.Id);
-                DownloadMp3Stream(fileRow, streamUrl);
-            }
-            catch (Exception ex)
-            {
-                fileRow.AddLog(string.Format("Chyba při stahování streamu: {0}.", ex.Message), FileRowState.Error);
+                fileRow.AddLog(string.Format("Nepodařilo se zjistit ID streamu (url:{0}).", streamUrl), FileRowState.Error);
             }
         }
 
 
-        private async void DownloadMp3Stream(FileRow fileRow, string streamUrl)
+        // kod pro dohledani ID streamu z html stranky - momentalne to vypada, ze nebude potreba - TODO casem vyhodit
+        //
+        //
+        //
+        //
+        //
+        //private async void StartDownloadFromPageUrl(FileRow fileRow, string url)
+        //{
+        //    var asyncDownloader = new AsyncDownloader();
+        //    var output = await asyncDownloader.GetString(url);
+        //    if (output.DownloadOk)
+        //    {
+        //        ParseIRadioHtmlPage(fileRow, output.Output);
+        //    }
+        //    else
+        //    {
+        //        fileRow.AddLog(string.Format("Chyba při stahování stránku pořadu: {0}.", output.Exception?.Message));
+        //    }
+        //}
+        ///// <summary>
+        ///// rozparsovani html stranky poradu
+        ///// </summary>
+        //private void ParseIRadioHtmlPage(FileRow fileRow, string html) 
+        //{
+        //    try
+        //    {
+        //        // html nemusi byt validni xml, takze je potreba pro parsovani pouzit Html Agility Pack, viz http://htmlagilitypack.codeplex.com/
+        //        // http://www.c-sharpcorner.com/UploadFile/9b86d4/getting-started-with-html-agility-pack/
+        //        var htmlDoc = new HtmlDocument();
+        //        htmlDoc.LoadHtml(html);
+
+        //        // <div id="player-track" class="player uniplayer" data-mode="audio" data-type="ondemand" data-autostart="1" data-id="3696063" data-event_label="Glosa [3696063]" data-duration="99" data-primary="html5" data-debug="1"></div>
+        //        fileRow.Id = FindAttributeValue(htmlDoc, @"//div[@id='player-track']", "data-id");
+
+        //        // <meta name="og:title" content="Dvojka - Glosa (01.09.2016 06:22)">
+        //        fileRow.StreamName = FindAttributeValue(htmlDoc, @"//meta[@name='og:title']", "content");
+
+        //        // <p title="Marie Procházková: Paralínek (1/6). Paralínek se učí létat. Malý ptáček Paralínek bydlí v hnízdě ...
+        //        fileRow.Title = FindAttributeValue(htmlDoc, @"//body//div/p[@title]", "title");
+
+        //        if (string.IsNullOrEmpty(fileRow.Id))
+        //        {
+        //            fileRow.AddLog("Chyba při parsování stránky pořadu - nepodařilo se dohledat ID streamu.", FileRowState.Error);
+        //            return;
+        //        }
+        //        if (string.IsNullOrEmpty(fileRow.StreamName))
+        //        {
+        //            fileRow.AddLog("Chyba při parsování stránky pořadu - nepodařilo se dohledat TITLE pořadu.", FileRowState.Error);
+        //            return;
+        //        }
+
+        //        var streamUrl = RadioHelpers.GetIRadioMp3Url(fileRow.Id);
+        //        DownloadMp3Stream(fileRow, streamUrl);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        fileRow.AddLog(string.Format("Chyba při stahování streamu: {0}.", ex.Message), FileRowState.Error);
+        //    }
+        //}
+
+
+        private async void DownloadMp3Stream(FileRow fileRow)
         {
-            fileRow.AddLog(string.Format("Stahuji stream: {0}", streamUrl));
+            fileRow.AddLog(string.Format("Stahuji stream: {0}", fileRow.Url));
+
+            GetId3Tags(fileRow);
 
             var asyncDownloader = new AsyncDownloader();
-            var output = await asyncDownloader.GetData(streamUrl,
+            var output = await asyncDownloader.GetData(fileRow.Url,
                                                        p =>
-                                                       { 
+                                                       {
                                                            fileRow.Progress = p.ProgressPercentage;
                                                            fileRow.BytesReceived = p.BytesReceived;
-                                                           TotalProgress.UpdateProgress(Files); 
+                                                           TotalProgress.UpdateProgress(Files);
                                                        });
             if (output.DownloadOk)
             {
@@ -323,21 +350,58 @@ namespace RadioOwl.ViewModels
         }
 
 
-        private void SaveMp3(FileRow fileRow, byte[] data) 
+        /// <summary>
+        /// dohledam Id3 tagy se stahovaneho streamu - jelikoz nedokazu nakouknout na rozstahovana data z AsyncDownloader.GetData(), musim jeste pred samotnym
+        /// stazenim pouzit tuto fci. Stahuje se jen Range z url, tak to snad nebude takova zatez ac se jedna o duplicitni data :-/
+        /// </summary>
+        private async void GetId3Tags(FileRow fileRow)
         {
-            var id3CommentTag = Id3Helper.GetId3TagComment(data);
-            var newFileNameOk = GetUniqSaveName(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), id3CommentTag, "mp3");
+            var data = await new AsyncDownloader().GetDataRange(fileRow.Url, 0, 4096);
+            if (data.DownloadOk)
+
+
+
+            //    var data = new AsyncDownloader().GetDataRange(fileRow.Url, 0, 4096).Result;
+            //if (data.DownloadOk)
+            {
+                var id3Tags = new Id3Tags(data.Output);
+                fileRow.Title = id3Tags.Title;
+                fileRow.Album = id3Tags.Album;
+                fileRow.AddLog("Id3 tagy ok.");
+            }
+            else
+            {
+                fileRow.AddLog(string.Format("Nepodařilo se načíst Id3 tagy ze streamu: {0}.", fileRow.Url));
+            }
+        }
+
+
+        private void SaveMp3(FileRow fileRow, byte[] data)
+        {
+            var fNameId3 = GetFileNameFromId3Tags(fileRow, data);
+            var newFileNameOk = GetUniqSaveName(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), fNameId3, "mp3");
 
             using (var file = new FileStream(newFileNameOk, FileMode.Create, FileAccess.Write))
             {
                 file.Write(data, 0, data.Length);
             }
             fileRow.SavedFileName = newFileNameOk;
-            if (string.IsNullOrEmpty(fileRow.Title))
-            {
-                fileRow.Title = id3CommentTag;
-            }
             fileRow.AddLog(string.Format("Uložen soubor: {0}", newFileNameOk), FileRowState.Finnished);
+        }
+
+
+        /// <summary>
+        /// sestrojeni filename z id3 tagu - pokud by v row jeste nebyly, doplnim je
+        /// </summary>
+        private static string GetFileNameFromId3Tags(FileRow fileRow, byte[] data)
+        {
+            if(string.IsNullOrEmpty(fileRow.Album) && string.IsNullOrEmpty(fileRow.Title))
+            {
+                var id3Tags = new Id3Tags(data);
+                fileRow.Title = id3Tags.Title;
+                fileRow.Album = id3Tags.Album;
+            }
+            return string.Format("{0}-{1}", fileRow.Album, fileRow.Title);
         }
 
 
@@ -346,7 +410,6 @@ namespace RadioOwl.ViewModels
         /// </summary>
         private string GetUniqSaveName(string path, string id3CommentTag, string extension)
         {
-            
             var fileName = (id3CommentTag ?? "_").ReplaceInvalidFilenameChar().TrimToMaxLen(FILENAME_MAX_LEN);
             string fullPathFilename;
             var attemptNo = 0;
@@ -355,36 +418,36 @@ namespace RadioOwl.ViewModels
                 var duplicateExtension = (attemptNo++ > 0) ? string.Format("_{0}", attemptNo) : null;
                 var fullFileName = string.Format("{0}{1}.{2}", fileName, duplicateExtension, extension);
                 fullPathFilename = Path.Combine(path, fullFileName);
-            } while (System.IO.File.Exists(fullPathFilename));
+            } while (File.Exists(fullPathFilename));
 
             return fullPathFilename;
         }
 
 
-        /// <summary>
-        /// zkousi dohledat atribut od html elemetu dohledaneho pres xPath
-        /// </summary>
-        /// <param name="htmlDoc">html dokument</param>
-        /// <param name="xPathNode">xPath pro dohledani elementu</param>
-        /// <param name="attributeName">jmeno hledaneho atributu</param>
-        /// <returns>hodnota hledaneho atributu</returns>
-        private static string FindAttributeValue(HtmlDocument htmlDoc, string xPathNode, string attributeName)
-        {
-            var xpathNodes = htmlDoc.DocumentNode.SelectNodes(xPathNode);
-            if (xpathNodes != null)
-            {
-                var node = xpathNodes.FirstOrDefault();
-                if (node != null)
-                {
-                    var att = node.Attributes.FirstOrDefault(p => p.Name == attributeName);
-                    if (att != null)
-                    {
-                        return att.Value;
-                    }
-                }
-            }
-            return null;
-        }
+        ///// <summary>
+        ///// zkousi dohledat atribut od html elemetu dohledaneho pres xPath
+        ///// </summary>
+        ///// <param name="htmlDoc">html dokument</param>
+        ///// <param name="xPathNode">xPath pro dohledani elementu</param>
+        ///// <param name="attributeName">jmeno hledaneho atributu</param>
+        ///// <returns>hodnota hledaneho atributu</returns>
+        //private static string FindAttributeValue(HtmlDocument htmlDoc, string xPathNode, string attributeName)
+        //{
+        //    var xpathNodes = htmlDoc.DocumentNode.SelectNodes(xPathNode);
+        //    if (xpathNodes != null)
+        //    {
+        //        var node = xpathNodes.FirstOrDefault();
+        //        if (node != null)
+        //        {
+        //            var att = node.Attributes.FirstOrDefault(p => p.Name == attributeName);
+        //            if (att != null)
+        //            {
+        //                return att.Value;
+        //            }
+        //        }
+        //    }
+        //    return null;
+        //}
                
         #endregion
     }

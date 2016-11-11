@@ -13,7 +13,7 @@ namespace RadioOwl.Data
         public string Url
         {
             get { return _url; }
-            private set
+            set
             {
                 _url = value;
                 OnPropertyChanged();
@@ -44,13 +44,13 @@ namespace RadioOwl.Data
         }
 
 
-        private string _streamName;
-        public string StreamName
+        private string _album;
+        public string Album
         {
-            get { return _streamName; }
+            get { return _album; }
             set
             {
-                _streamName = value;
+                _album = value;
                 OnPropertyChanged();
             }
         }

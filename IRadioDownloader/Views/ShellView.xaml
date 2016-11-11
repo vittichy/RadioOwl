@@ -79,10 +79,9 @@
                                       [Event PreviewDragOver] = [Action EventPreviewDragOver($eventArgs)];" >
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Url" Binding="{Binding Url, Mode=OneWay}" Width="160"/>
-                <!--<DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="70"/>-->
-                <DataGridTextColumn Header="Pořad" Binding="{Binding StreamName}" Width="300"/>
-                <DataGridTextColumn Header="Titulek" Binding="{Binding Title}" Width="400"/>
-
+                <DataGridTextColumn Header="Id" Binding="{Binding Id, Mode=OneWay}" Width="70"/>
+                <DataGridTextColumn Header="Pořad" Binding="{Binding Album}" Width="200"/>
+                <DataGridTextColumn Header="Titulek" Binding="{Binding Title}" Width="440"/>
                 <DataGridTemplateColumn Header="Log" Width="200">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

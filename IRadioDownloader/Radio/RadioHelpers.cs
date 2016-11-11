@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using vt.Extensions;
 
 namespace RadioOwl.Radio
@@ -34,8 +31,6 @@ namespace RadioOwl.Radio
         private const string URL_IRADIO_MP3_DOWNLOAD_URL = URL_BEGINNING_MP3_AUDIO + @"{0}.mp3";     // url iradio streamu kdyz uz vim ID poradu
 
 
-
-
         #endregion
 
         public static string GetIRadioMp3Url(string id)
@@ -44,6 +39,9 @@ namespace RadioOwl.Radio
         }
 
 
+        /// <summary>
+        /// jedna se o URL, ktere umim zpracovat?
+        /// </summary>
         public static bool IsUrlToIRadio(string url)
         {
             return (IsUrlToIRadioDownload(url) || IsUrlToIRadioPlayPage(url));
@@ -80,9 +78,26 @@ namespace RadioOwl.Radio
         }
 
 
+        /// <summary>
+        /// ziskani ID streamu z url
+        /// napr:
+        /// http://prehravac.rozhlas.cz/audio/3686290/embed?iframe=true&width=545&height=550
+        /// http://prehravac.rozhlas.cz/audio/3741710
+        /// </summary>
+        /// <param name="url">url z IRadio</param>
+        /// <returns>ID streamu</returns>
         private static string GetStreamIdFromIRadioPlayUrl(string url)
         {
-            return url.SusbstringFromLastChar('/').Trim();
+            if (!string.IsNullOrEmpty(url))
+            {
+                var id = url.RemoveStartText(URL_BEGINNING_PLAY);
+                if (!string.IsNullOrEmpty(id) && id.Contains('/'))
+                {
+                    id = id.SusbstringToChar('/');
+                }
+                return id;
+            }
+            return null;
         }
 
 
@@ -90,13 +105,6 @@ namespace RadioOwl.Radio
         {
             return url.SusbstringFromLastChar('/').SusbstringToChar('.').Trim();
         }
-
-
-        //private bool IsUrlToProglas(string url)
-        //{
-        //    return (!string.IsNullOrEmpty(url) && url.StartsWith(URL_BEGINNING_PROGLAS, StringComparison.InvariantCultureIgnoreCase));
-        //}
-
-
+                
     }
 }

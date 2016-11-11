@@ -48,9 +48,9 @@ namespace RadioOwl.ViewModels
 
         #region Constructors
 
-        public SniffAroundViewModel(string startUrlStream)
+        public SniffAroundViewModel(string primaryId)
         {
-            UrlStreams = PrepareStreamUrls(startUrlStream);
+            UrlStreams = PrepareStreamUrls(primaryId);
         }
 
         #endregion
@@ -61,11 +61,11 @@ namespace RadioOwl.ViewModels
         /// <summary>
         /// zaridi form a hned vraci string vysledek
         /// </summary>
-        public static List<StreamUrlRow> ExecuteModal(string primaryUrlStream)
+        public static List<StreamUrlRow> ExecuteModal(string primaryId)
         {
             try
             {
-                var instance = new SniffAroundViewModel(primaryUrlStream);
+                var instance = new SniffAroundViewModel(primaryId);
                 var dialogResult = new WindowManager().ShowDialog(instance);
                 return (dialogResult.HasValue && dialogResult.Value) ? instance.SelectedRows?.OfType<StreamUrlRow>().ToList() : null;
             }
@@ -91,18 +91,15 @@ namespace RadioOwl.ViewModels
         /// <summary>
         /// inicializace radku pro ID v rozsahu +-StreamCount
         /// </summary>
-        /// <param name="primaryUrlStream">url s primarnim ID</param>
-        private ObservableCollection<StreamUrlRow> PrepareStreamUrls(string primaryUrlStream)
+        private ObservableCollection<StreamUrlRow> PrepareStreamUrls(string primaryId)
         {
             var result = new ObservableCollection<StreamUrlRow>();
 
-            var primaryStreamId = RadioHelpers.GetStreamIdFromUrl(primaryUrlStream);
-
-            if (!string.IsNullOrEmpty(primaryStreamId))
+            if (!string.IsNullOrEmpty(primaryId))
             {
                 for (int i = -StreamCount; i < StreamCount; i++)
                 {
-                    var id = primaryStreamId.IncrementStringNumber(i);
+                    var id = primaryId.IncrementStringNumber(i);
                     var radioMp3 = RadioHelpers.GetIRadioMp3Url(id);
                     var row = new StreamUrlRow(id, radioMp3);
                     //row.State = (id == primaryStreamId) ? StreamUrlRowState.IsPrimaryId : StreamUrlRowState.None;
@@ -112,7 +109,7 @@ namespace RadioOwl.ViewModels
             }
             else
             {
-                MessageBox.Show(string.Format("Nepodařilo se zjistit ID streamu. {0}", primaryUrlStream));
+                MessageBox.Show(string.Format("Nepodařilo se zjistit ID streamu. {0}", primaryId));
                 TryClose();
             }
             return result;
