@@ -40,13 +40,26 @@ namespace RadioOwl.Radio
 
 
         /// <summary>
-        /// jedna se o URL, ktere umim zpracovat?
+        /// jedna se o jeden z typu URL, ktere umim zpracovat?
         /// </summary>
         public static bool IsUrlToIRadio(string url)
         {
-            return (IsUrlToIRadioDownload(url) || IsUrlToIRadioPlayPage(url));
+            return (IsUrlToIRadioDownload(url) || IsUrlToIRadioPlayPage(url) || IsUrlToVltavaPlay(url));
         }
 
+
+        /// <summary>
+        /// Od 04-2017 je novy web Vltavy, kde je dalsi typ odkazu, vypada cca takhle: "http://vltava.rozhlas.cz/alfred-kubin-zeme-snivcu-110-5343294#play"
+        /// a pousti JS player. Odkaz na stream lze nasledne dohledat v html.
+        /// </summary>
+        public static bool IsUrlToVltavaPlay(string url)
+        {
+            return (!string.IsNullOrEmpty(url) 
+                        && url.StartsWith(@"http://", StringComparison.InvariantCultureIgnoreCase) 
+                        && url.Contains(@".rozhlas.cz/") 
+                        && url.EndsWith(@"#play", StringComparison.InvariantCultureIgnoreCase));
+        }
+        
 
         public static bool IsUrlToIRadioDownload(string url)
         {

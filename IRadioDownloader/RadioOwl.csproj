@@ -163,6 +163,7 @@
       <DependentUpon>SniffAroundView.xaml</DependentUpon>
     </Compile>
     <Compile Include="vt\Extensions\ExceptionExtensions.cs" />
+    <Compile Include="vt\Extensions\HtmlAgilityPack\HtmlNodeExtensions.cs" />
     <Compile Include="vt\Extensions\ListExtension.cs" />
     <Compile Include="vt\Extensions\LongExtensions.cs" />
     <Compile Include="vt\Extensions\StringExtension.cs" />

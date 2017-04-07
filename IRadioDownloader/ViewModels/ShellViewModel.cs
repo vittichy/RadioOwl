@@ -1,11 +1,14 @@
-﻿using RadioOwl.Data;
+﻿using HtmlAgilityPack;
+using RadioOwl.Data;
 using RadioOwl.Id3;
 using RadioOwl.Radio;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using vt.Extensions;
+using vt.Extensions.HtmlAgilityPack;
 using vt.Http;
 
 namespace RadioOwl.ViewModels
@@ -30,6 +33,7 @@ namespace RadioOwl.ViewModels
         public ObservableCollection<FileRow> Files { get; set; }
 
         private FileRow _selectedRow;
+
         public FileRow SelectedRow
         {
             get { return _selectedRow; }
@@ -124,14 +128,13 @@ namespace RadioOwl.ViewModels
             var url = GetPageUrl(e);
             if (!string.IsNullOrEmpty(url))
             {
-                e.Handled = true;
                 e.Effects = DragDropEffects.All;
             }
             else
             {
                 e.Effects = DragDropEffects.None;
-                e.Handled = true;
             }
+            e.Handled = true;
         }
 
 
@@ -234,9 +237,37 @@ namespace RadioOwl.ViewModels
             {
                 StartDownloadFromStreamUrl(fileRow, url);
             }
+            else if (RadioHelpers.IsUrlToVltavaPlay(url))
+            {
+                StartDownloadFromVltavaPlayUrl(fileRow, url);
+            }
             else
             {
                 fileRow.AddLog(string.Format("Neznámé url: {0}.", url));
+            }
+        }
+
+
+        /// <summary>
+        /// drag-dropnute url z javascript playeru z webu Vltavy (zatim) - je nutne stahnout html a dohledat link na mp3 stream
+        /// </summary>
+        /// <param name="fileRow"></param>
+        /// <param name="url"></param>
+        private async void StartDownloadFromVltavaPlayUrl(FileRow fileRow, string url)
+        {
+            var asyncDownloader = new AsyncDownloader();
+            var downloader = await asyncDownloader.GetString(url);
+            if (downloader.DownloadOk)
+            {
+                ParseVltavaStyleHtmlPage(fileRow, downloader.Output);
+                if (!string.IsNullOrEmpty(fileRow.Url))
+                {
+                    DownloadMp3Stream(fileRow);
+                }
+            }
+            else
+            {
+                fileRow.AddLog(string.Format("Chyba při stahování stránku pořadu: {0}.", downloader.Exception?.Message));
             }
         }
 
@@ -264,25 +295,42 @@ namespace RadioOwl.ViewModels
         }
 
 
-        // kod pro dohledani ID streamu z html stranky - momentalne to vypada, ze nebude potreba - TODO casem vyhodit
-        //
-        //
-        //
-        //
-        //
-        //private async void StartDownloadFromPageUrl(FileRow fileRow, string url)
-        //{
-        //    var asyncDownloader = new AsyncDownloader();
-        //    var output = await asyncDownloader.GetString(url);
-        //    if (output.DownloadOk)
-        //    {
-        //        ParseIRadioHtmlPage(fileRow, output.Output);
-        //    }
-        //    else
-        //    {
-        //        fileRow.AddLog(string.Format("Chyba při stahování stránku pořadu: {0}.", output.Exception?.Message));
-        //    }
-        //}
+        /// <summary>
+        /// rozparsovani html stranky poradu
+        /// </summary>
+        private void ParseVltavaStyleHtmlPage(FileRow fileRow, string html)
+        {
+            try
+            {
+                // html nemusi byt validni xml, takze je potreba pro parsovani pouzit Html Agility Pack, viz http://htmlagilitypack.codeplex.com/
+                // http://www.c-sharpcorner.com/UploadFile/9b86d4/getting-started-with-html-agility-pack/
+                var htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(html);
+
+                var vltavaAnchorNode = VltavaPageFindStreamUrl(htmlDoc, @"//div[@class='sm2-playlist-wrapper']");
+                if(vltavaAnchorNode != null)
+                {
+                    // povedlo se dohledat <a>, vykousnu href atribut a je to
+                    fileRow.Url = vltavaAnchorNode.GetAttributeValueByName("HREF");
+                    // ID v tomhle pripade nemam
+                    fileRow.Id = "?";
+                    // title jen vykousnu ze stranky
+                    fileRow.Title = VltavaPageFindTitle(htmlDoc, @"//meta[@property='og:title']");
+                }
+
+                if (string.IsNullOrEmpty(fileRow.Url))
+                {
+                    fileRow.AddLog("Chyba při parsování stránky pořadu - nepodařilo se dohledat URL streamu.", FileRowState.Error);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                fileRow.AddLog(string.Format("Chyba při stahování streamu: {0}.", ex.Message), FileRowState.Error);
+            }
+        }
+
+
         ///// <summary>
         ///// rozparsovani html stranky poradu
         ///// </summary>
@@ -358,15 +406,17 @@ namespace RadioOwl.ViewModels
         {
             var data = await new AsyncDownloader().GetDataRange(fileRow.Url, 0, 4096);
             if (data.DownloadOk)
-
-
-
-            //    var data = new AsyncDownloader().GetDataRange(fileRow.Url, 0, 4096).Result;
-            //if (data.DownloadOk)
             {
                 var id3Tags = new Id3Tags(data.Output);
-                fileRow.Title = id3Tags.Title;
-                fileRow.Album = id3Tags.Album;
+                // prepisovat jen je-li naplneno - napr ted u vltava strane ID3 tagy nejsou :-/
+                if (!string.IsNullOrEmpty(id3Tags.Title))
+                {
+                    fileRow.Title = id3Tags.Title;
+                }
+                if (!string.IsNullOrEmpty(id3Tags.Album))
+                {
+                    fileRow.Album = id3Tags.Album;
+                }
                 fileRow.AddLog("Id3 tagy ok.");
             }
             else
@@ -424,31 +474,71 @@ namespace RadioOwl.ViewModels
         }
 
 
-        ///// <summary>
-        ///// zkousi dohledat atribut od html elemetu dohledaneho pres xPath
-        ///// </summary>
-        ///// <param name="htmlDoc">html dokument</param>
-        ///// <param name="xPathNode">xPath pro dohledani elementu</param>
-        ///// <param name="attributeName">jmeno hledaneho atributu</param>
-        ///// <returns>hodnota hledaneho atributu</returns>
-        //private static string FindAttributeValue(HtmlDocument htmlDoc, string xPathNode, string attributeName)
-        //{
-        //    var xpathNodes = htmlDoc.DocumentNode.SelectNodes(xPathNode);
-        //    if (xpathNodes != null)
-        //    {
-        //        var node = xpathNodes.FirstOrDefault();
-        //        if (node != null)
-        //        {
-        //            var att = node.Attributes.FirstOrDefault(p => p.Name == attributeName);
-        //            if (att != null)
-        //            {
-        //                return att.Value;
-        //            }
-        //        }
-        //    }
-        //    return null;
-        //}
-               
+        /// <summary>
+        /// zkousi dohledat atribut od html elemetu dohledaneho pres xPath
+        /// </summary>
+        /// <param name="htmlDoc">html dokument</param>
+        /// <param name="xPathNode">xPath pro dohledani elementu</param>
+        /// <param name="attributeName">jmeno hledaneho atributu</param>
+        /// <returns>hodnota hledaneho atributu</returns>
+        private static string FindAttributeValue(HtmlDocument htmlDoc, string xPathNode, string attributeName)
+        {
+            var xpathNodes = htmlDoc.DocumentNode.SelectNodes(xPathNode);
+            if (xpathNodes != null)
+            {
+                var node = xpathNodes.FirstOrDefault();
+                if (node != null)
+                {
+                    var att = node.Attributes.FirstOrDefault(p => p.Name == attributeName);
+                    if (att != null)
+                    {
+                        return att.Value;
+                    }
+                }
+            }
+            return null;
+        }
+        
+
+        /// <summary>
+        /// dohledani url k mp3 streamu na vltava like odkazu
+        /// </summary>
+        private static HtmlNode VltavaPageFindStreamUrl(HtmlDocument htmlDoc, string xPathNode)
+        {
+            var xpathNodes = htmlDoc.DocumentNode.SelectNodes(xPathNode);
+            if (xpathNodes != null)
+            {
+                // html tagy dohledany pres xPath - staci mi ten prvni ;-) vic ji ted ani neni
+                var htmlNode = xpathNodes.FirstOrDefault();
+                if (htmlNode != null)
+                {
+                    // mel by mit par urovni pod sebou <a> kde mne zajima jeho href
+                    var childNodeOfType = htmlNode.GetSubNodesOfName("A").FirstOrDefault();
+                    return childNodeOfType;
+                }
+            }
+            return null;
+        }
+
+
+        /// <summary>
+        /// dohledani title k mp3 streamu na vltava like odkazu - trochu tim supluju ID3 tagy, ktere ted v stazenem souboru neni
+        /// </summary>
+        private static string VltavaPageFindTitle(HtmlDocument htmlDoc, string xPathNode)
+        {
+            var xpathNodes = htmlDoc.DocumentNode.SelectNodes(xPathNode);
+            if (xpathNodes != null)
+            {
+                var htmlNode = xpathNodes.FirstOrDefault();
+                if (htmlNode != null)
+                {
+                    var contentValue = htmlNode.GetAttributeValueByName("content");
+                    return contentValue;
+                }
+            }
+            return null;
+        }
+
         #endregion
     }
 }
