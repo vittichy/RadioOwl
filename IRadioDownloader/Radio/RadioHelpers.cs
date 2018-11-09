@@ -49,17 +49,33 @@ namespace RadioOwl.Radio
 
 
         /// <summary>
+        /// Odkaz 'Přehrát' verze 2018-11
+        /// http://plus.rozhlas.cz/host-galeristka-a-kuratorka-jirina-divacka-7671850?player=on#player
+        /// http://region.rozhlas.cz/malebne-vlakove-nadrazi-v-hradku-u-susice-se-dostalo-mezi-deset-nejkrasnejsich-u-7671216?player=on#player
+        /// http://radiozurnal.rozhlas.cz/pribeh-stoleti-7627378#dil=99?player=on#player
+        /// http://dvojka.rozhlas.cz/miroslav-hornicek-petatricet-skvelych-pruvanu-a-jine-povidky-7670628#dil=2?player=on#player
+        /// </summary>
+        public static bool IsUrlToPrehrat2018(string url)
+        {
+            return (!string.IsNullOrEmpty(url)
+                        && url.StartsWith(@"http://", StringComparison.InvariantCultureIgnoreCase)
+                        && url.Contains(@".rozhlas.cz/")
+                        && url.EndsWith(@"?player=on#player", StringComparison.InvariantCultureIgnoreCase));
+        }
+
+
+        /// <summary>
         /// Od 04-2017 je novy web Vltavy, kde je dalsi typ odkazu, vypada cca takhle: "http://vltava.rozhlas.cz/alfred-kubin-zeme-snivcu-110-5343294#play"
         /// a pousti JS player. Odkaz na stream lze nasledne dohledat v html.
         /// </summary>
         public static bool IsUrlToVltavaPlay(string url)
         {
-            return (!string.IsNullOrEmpty(url) 
-                        && url.StartsWith(@"http://", StringComparison.InvariantCultureIgnoreCase) 
-                        && url.Contains(@".rozhlas.cz/") 
+            return (!string.IsNullOrEmpty(url)
+                        && url.StartsWith(@"http://", StringComparison.InvariantCultureIgnoreCase)
+                        && url.Contains(@".rozhlas.cz/")
                         && url.EndsWith(@"#play", StringComparison.InvariantCultureIgnoreCase));
         }
-        
+
 
         public static bool IsUrlToIRadioDownload(string url)
         {

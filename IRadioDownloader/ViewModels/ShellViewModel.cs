@@ -241,9 +241,69 @@ namespace RadioOwl.ViewModels
             {
                 StartDownloadFromVltavaPlayUrl(fileRow, url);
             }
+            else if (RadioHelpers.IsUrlToPrehrat2018(url))
+            {
+                StartDownloadFromPrehrat2018Url(fileRow, url);
+            }
             else
             {
                 fileRow.AddLog(string.Format("Neznámé url: {0}.", url));
+            }
+        }
+
+
+        private async void StartDownloadFromPrehrat2018Url(FileRow fileRow, string url)
+        {
+            var asyncDownloader = new AsyncDownloader();
+            var downloader = await asyncDownloader.GetString(url);
+            if (downloader.DownloadOk)
+            {
+                ParsePrehrat2018HtmlPage(fileRow, downloader.Output);
+                if (!string.IsNullOrEmpty(fileRow.Url))
+                {
+                    DownloadMp3Stream(fileRow);
+                }
+            }
+            else
+            {
+                fileRow.AddLog(string.Format("Chyba při stahování stránku pořadu: {0}.", downloader.Exception?.Message));
+            }
+        }
+
+
+        private void ParsePrehrat2018HtmlPage(FileRow fileRow, string output)
+        {
+            // TODO zde muze byt vice url ... takze to nejak doplnit do toho gridu? a pocitat s tim, ze jich bude vice
+            // - mozna jen upravit fileRow.url na list? 
+            // TODO - stare musim ponechat! aby slo stahovat stare veci!
+
+            try
+            {
+                // html nemusi byt validni xml, takze je potreba pro parsovani pouzit Html Agility Pack, viz http://htmlagilitypack.codeplex.com/
+                // http://www.c-sharpcorner.com/UploadFile/9b86d4/getting-started-with-html-agility-pack/
+                var htmlDoc = new HtmlDocument();
+// ?? htmlDoc.LoadHtml(html);
+
+                var vltavaAnchorNode = VltavaPageFindStreamUrl(htmlDoc, @"//div[@class='sm2-playlist-wrapper']");
+                if (vltavaAnchorNode != null)
+                {
+                    // povedlo se dohledat <a>, vykousnu href atribut a je to
+                    fileRow.Url = vltavaAnchorNode.GetAttributeValueByName("HREF");
+                    // ID v tomhle pripade nemam
+                    fileRow.Id = "?";
+                    // title jen vykousnu ze stranky
+                    fileRow.Title = VltavaPageFindTitle(htmlDoc, @"//meta[@property='og:title']");
+                }
+
+                if (string.IsNullOrEmpty(fileRow.Url))
+                {
+                    fileRow.AddLog("Chyba při parsování stránky pořadu - nepodařilo se dohledat URL streamu.", FileRowState.Error);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                fileRow.AddLog(string.Format("Chyba při stahování streamu: {0}.", ex.Message), FileRowState.Error);
             }
         }
 
