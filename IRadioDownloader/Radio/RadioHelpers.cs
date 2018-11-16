@@ -44,7 +44,7 @@ namespace RadioOwl.Radio
         /// </summary>
         public static bool IsUrlToIRadio(string url)
         {
-            return (IsUrlToIRadioDownload(url) || IsUrlToIRadioPlayPage(url) || IsUrlToVltavaPlay(url));
+            return (IsUrlToIRadioDownload(url) || IsUrlToIRadioPlayPage(url) || IsUrlToVltavaPlay(url) || IsUrlToPrehrat2018(url));
         }
 
 

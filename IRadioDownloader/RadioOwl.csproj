@@ -146,6 +146,7 @@
     </ApplicationDefinition>
     <Compile Include="Data\FileRow.cs" />
     <Compile Include="Data\FileRowState.cs" />
+    <Compile Include="Data\Prehrat2018ParseResult.cs" />
     <Compile Include="Data\PropertyChangedBase.cs" />
     <Compile Include="Data\StreamUrlRow.cs" />
     <Compile Include="Data\StreamUrlRowState.cs" />

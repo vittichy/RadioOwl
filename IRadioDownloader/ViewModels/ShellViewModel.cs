@@ -163,11 +163,13 @@ namespace RadioOwl.ViewModels
         /// </summary>
         public void SniffAround()
         {
-            if (CanSniffAround)
-            {
-                var urlStreams = SniffAroundViewModel.ExecuteModal(SelectedRow?.Id);
-                urlStreams?.ForEach(p => ProcessUrl(p));
-            }
+            // TODO zrusit?
+
+            //if (CanSniffAround)
+            //{
+            //    var urlStreams = SniffAroundViewModel.ExecuteModal(SelectedRow?.Id);
+            //    urlStreams?.ForEach(p => ProcessUrl(p));
+            //}
         }
 
         #endregion
@@ -200,8 +202,8 @@ namespace RadioOwl.ViewModels
         /// </summary>
         private void ProcessUrl(StreamUrlRow streamUrlRow)
         {
-            var fileRow = new FileRow(streamUrlRow);
-            ProcessUrlRow(fileRow, fileRow.Url);
+            //var fileRow = new FileRow(Files, streamUrlRow);
+            //ProcessUrlRow(fileRow, fileRow.Url);
         }
 
 
@@ -210,7 +212,7 @@ namespace RadioOwl.ViewModels
         /// </summary>
         private void ProcessUrl(string url)
         {
-            var fileRow = new FileRow(url);
+            var fileRow = new FileRow(Files, url);
             ProcessUrlRow(fileRow, url);
         }
 
@@ -258,10 +260,21 @@ namespace RadioOwl.ViewModels
             var downloader = await asyncDownloader.GetString(url);
             if (downloader.DownloadOk)
             {
-                ParsePrehrat2018HtmlPage(fileRow, downloader.Output);
-                if (!string.IsNullOrEmpty(fileRow.Url))
+                var parserResult = new RadioHtmlParser().ParsePrehrat2018Html(downloader.Output);
+
+                if(!parserResult.Log.Any())
                 {
-                    DownloadMp3Stream(fileRow);
+                    if
+                    if (!string.IsNullOrEmpty(fileRow.Url))
+                    {
+                        DownloadMp3Stream(fileRow);
+
+                    }
+                }
+                else
+                {
+                    // chyby pri parsovani - jen prekopiruji
+                    parserResult.Log.ForEach(p => fileRow.AddLog(p, FileRowState.Error));
                 }
             }
             else
@@ -270,44 +283,7 @@ namespace RadioOwl.ViewModels
             }
         }
 
-
-        private void ParsePrehrat2018HtmlPage(FileRow fileRow, string output)
-        {
-            // TODO zde muze byt vice url ... takze to nejak doplnit do toho gridu? a pocitat s tim, ze jich bude vice
-            // - mozna jen upravit fileRow.url na list? 
-            // TODO - stare musim ponechat! aby slo stahovat stare veci!
-
-            try
-            {
-                // html nemusi byt validni xml, takze je potreba pro parsovani pouzit Html Agility Pack, viz http://htmlagilitypack.codeplex.com/
-                // http://www.c-sharpcorner.com/UploadFile/9b86d4/getting-started-with-html-agility-pack/
-                var htmlDoc = new HtmlDocument();
-// ?? htmlDoc.LoadHtml(html);
-
-                var vltavaAnchorNode = VltavaPageFindStreamUrl(htmlDoc, @"//div[@class='sm2-playlist-wrapper']");
-                if (vltavaAnchorNode != null)
-                {
-                    // povedlo se dohledat <a>, vykousnu href atribut a je to
-                    fileRow.Url = vltavaAnchorNode.GetAttributeValueByName("HREF");
-                    // ID v tomhle pripade nemam
-                    fileRow.Id = "?";
-                    // title jen vykousnu ze stranky
-                    fileRow.Title = VltavaPageFindTitle(htmlDoc, @"//meta[@property='og:title']");
-                }
-
-                if (string.IsNullOrEmpty(fileRow.Url))
-                {
-                    fileRow.AddLog("Chyba při parsování stránky pořadu - nepodařilo se dohledat URL streamu.", FileRowState.Error);
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                fileRow.AddLog(string.Format("Chyba při stahování streamu: {0}.", ex.Message), FileRowState.Error);
-            }
-        }
-
-
+        
         /// <summary>
         /// drag-dropnute url z javascript playeru z webu Vltavy (zatim) - je nutne stahnout html a dohledat link na mp3 stream
         /// </summary>

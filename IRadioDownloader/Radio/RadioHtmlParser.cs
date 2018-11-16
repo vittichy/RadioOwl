@@ -5,47 +5,18 @@ using RadioOwl.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RadioOwl.Radio
 {
     public class RadioHtmlParser
     {
-
-
-        ///// <summary>
-        ///// dohledani url k mp3 streamu na vltava like odkazu
-        ///// </summary>
-        //private static HtmlNode VltavaPageFindStreamUrl(HtmlDocument htmlDoc, string xPathNode)
-        //{
-        //    var xpathNodes = htmlDoc.DocumentNode.SelectNodes(xPathNode);
-        //    if (xpathNodes != null)
-        //    {
-        //        // html tagy dohledany pres xPath - staci mi ten prvni ;-) vic ji ted ani neni
-        //        var htmlNode = xpathNodes.FirstOrDefault();
-        //        if (htmlNode != null)
-        //        {
-        //            // mel by mit par urovni pod sebou <a> kde mne zajima jeho href
-        //            var childNodeOfType = htmlNode.GetSubNodesOfName("A").FirstOrDefault();
-        //            return childNodeOfType;
-        //        }
-        //    }
-        //    return null;
-        //}
-
-
-//        var vltavaAnchorNode = VltavaPageFindStreamUrl(htmlDoc, @"//div[@class='sm2-playlist-wrapper']");
-
-
-
-
-        public void ParsePrehrat2018Html(string html, ref FileRow fileRow)
+        public Prehrat2018ParseResult ParsePrehrat2018Html(string html)
         {
+            var result = new Prehrat2018ParseResult();
+
             // TODO zde muze byt vice url ... takze to nejak doplnit do toho gridu? a pocitat s tim, ze jich bude vice
             // - mozna jen upravit fileRow.url na list? 
             // TODO - stare musim ponechat! aby slo stahovat stare veci!
-
             try
             {
                 // html nemusi byt validni xml, takze je potreba pro parsovani pouzit Html Agility Pack
@@ -64,57 +35,48 @@ namespace RadioOwl.Radio
                         var json = drupalSettingsJson.RemoveStartTextTo('{').RemoveEndTextTo('}');
                         json = "{" + json + "}";
 
-
                         var jObject = JObject.Parse(json);
 
-
-                        //  ajaxPageState
-                        // "soundmanager2":{
-
+                        //  ajaxPageState "soundmanager2":{
                         var downloadItem = jObject.SelectToken("soundmanager2.download");
-
-                        // https://region.rozhlas.cz/sites/default/files/audios/ee77510acabbc23b7ecbac29f5a6abe7.mp3
-                        // https://region.rozhlas.cz/audio-download/sites/default/files/audios/ee77510acabbc23b7ecbac29f5a6abe7.mp3
-
-                        foreach (JToken item in downloadItem.Children()) //.Children())
+                        if (downloadItem != null)
                         {
-                            var a = item.ToString();
+                            foreach (JToken item in downloadItem.Children())
+                            {
+                                // takhle to vypada: "https://region.rozhlas.cz/sites/default/files/audios/68919bf46b77f6246089a1dd38b35bf9.mp3": "https://region.rozhlas.cz/audio-download/sites/default/files/audios/68919bf46b77f6246089a1dd38b35bf9-mp3"
+                                // mp3 se da stahnout z obou url ... zatim tedy budu pouzivat ten prvni
+                                var urlToken = item.ToString();
+                                if (!string.IsNullOrEmpty(urlToken))
+                                {
+                                    var urlSet = urlToken.Split('"');
+                                    if(urlSet.Count() > 2)
+                                    {
+                                        result.Urls.Add(urlSet[1]);
+                                    }
+                                }
+                            }
                         }
-
+                        if (!result.Urls.Any())
+                        {
+                            result.Log.Add("Chyba při parsování html - nepodařilo se dohledat seznam url z json dat.");
+                        }
                     }
                     else
                     {
-                        fileRow.AddLog("Chyba při parsování html - nepodařilo se dohledat 'Drupal.Setings' json data.", FileRowState.Error);
+                        result.Log.Add("Chyba při parsování html - nepodařilo se dohledat 'Drupal.Setings' json data.");
                     }
                 }
                 else
                 {
-                    fileRow.AddLog("Chyba při parsování html - nepodařilo se dohledat //head//script nody.", FileRowState.Error);
+                    result.Log.Add("Chyba při parsování html - nepodařilo se dohledat //head//script nody.");
                 }
-
-
-
-                //var vltavaAnchorNode = VltavaPageFindStreamUrl(htmlDoc, @"//div[@class='sm2-playlist-wrapper']");
-                //if (vltavaAnchorNode != null)
-                //{
-                //    // povedlo se dohledat <a>, vykousnu href atribut a je to
-                //    fileRow.Url = vltavaAnchorNode.GetAttributeValueByName("HREF");
-                //    // ID v tomhle pripade nemam
-                //    fileRow.Id = "?";
-                //    // title jen vykousnu ze stranky
-                //    fileRow.Title = VltavaPageFindTitle(htmlDoc, @"//meta[@property='og:title']");
-                //}
-
-                //if (string.IsNullOrEmpty(fileRow.Url))
-                //{
-                //    fileRow.AddLog("Chyba při parsování stránky pořadu - nepodařilo se dohledat URL streamu.", FileRowState.Error);
-                //    return;
-                //}
             }
             catch (Exception ex)
             {
-                fileRow.AddLog(string.Format("ParsePrehrat2018Html error: {0}.", ex.Message), FileRowState.Error);
+                result.Log.Add(string.Format("ParsePrehrat2018Html error: {0}.", ex.Message));
             }
+
+            return result;
         }
     }
 }

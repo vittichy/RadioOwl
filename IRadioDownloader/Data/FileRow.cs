@@ -9,6 +9,11 @@ namespace RadioOwl.Data
     /// </summary>
     public class FileRow :  PropertyChangedBase
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly IList<FileRow> ParentList;
+
         private string _url;
         public string Url
         {
@@ -163,14 +168,15 @@ namespace RadioOwl.Data
         }
 
 
-        public FileRow(string url)
+        public FileRow(IList<FileRow> parentList, string url)
         {
+            ParentList = parentList;
             State = FileRowState.Started;
             LogList = new List<string>();
             Url = url;
         }
 
-        public FileRow(StreamUrlRow streamUrlRow) : this(streamUrlRow?.Url)
+        public FileRow(IList<FileRow> parentList, StreamUrlRow streamUrlRow) : this(parentList, streamUrlRow?.Url)
         {
             Title = streamUrlRow?.Title;
         }

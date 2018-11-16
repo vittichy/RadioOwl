@@ -20,7 +20,7 @@
                         <TextBlock VerticalAlignment="Center" Margin="3,0,10,0" >Načíst z URL</TextBlock>
                     </StackPanel>
                 </Button>
-                <Button Name="SniffAround" >
+                <Button Name="SniffAround" IsEnabled="False" >
                     <StackPanel Orientation="Horizontal">
                         <Image Source="/RadioOwl;component/icons/glyphicons-10-magic.png" />
                         <TextBlock VerticalAlignment="Center" Margin="3,0,10,0" >Očuchat okolní ID</TextBlock>

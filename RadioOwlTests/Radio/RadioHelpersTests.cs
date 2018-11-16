@@ -59,9 +59,7 @@ namespace RadioOwlTests.Radio
         public void XXXXX()
         {
             var html = GetEmbeddedResource("Prehrat2018_01.html");
-
-            var fileRow = new FileRow("");
-            new RadioHtmlParser().ParsePrehrat2018Html(html, ref fileRow);
+            new RadioHtmlParser().ParsePrehrat2018Html(html);
 
             ////D:\vt-src\RadioOwl\RadioOwlTests\TestData\Prehrat2018_01.html
             //var assembly = Assembly.GetExecutingAssembly();
