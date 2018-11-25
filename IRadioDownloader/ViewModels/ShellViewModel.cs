@@ -1,9 +1,9 @@
 ﻿using HtmlAgilityPack;
 using RadioOwl.Data;
 using RadioOwl.Id3;
+using RadioOwl.PageParsers;
 using RadioOwl.Radio;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -25,6 +25,8 @@ namespace RadioOwl.ViewModels
 
 
         #region Properties
+
+        private readonly Parsers parsers = new Parsers();
 
         /// <summary>
         /// titulek okna
@@ -127,14 +129,8 @@ namespace RadioOwl.ViewModels
         public void EventPreviewDragOver(DragEventArgs e)
         {
             var url = GetPageUrl(e);
-            if (!string.IsNullOrEmpty(url))
-            {
-                e.Effects = DragDropEffects.All;
-            }
-            else
-            {
-                e.Effects = DragDropEffects.None;
-            }
+            var parser = parsers.Chain.CanDecodeUrl(url);
+            e.Effects = (parser != null) ? DragDropEffects.Copy : DragDropEffects.None;
             e.Handled = true;
         }
 
@@ -214,81 +210,120 @@ namespace RadioOwl.ViewModels
         private void ProcessUrl(string url)
         {
             var fileRow = new FileRow(Files, url);
-            ProcessUrlRow(fileRow, url);
-        }
 
-
-        /// <summary>
-        /// zahaji zpracovani radku pro dotazenou url
-        /// </summary>
-        private void ProcessUrlRow(FileRow fileRow, string url)
-        {
-            Files.Insert(0, fileRow);
+            Files.Add(fileRow);
             fileRow.AddLog("Stahuji stránku pořadu.", FileRowState.Started);
 
-            StartDownload(fileRow, url);
+            StartDownload(fileRow);
+
+            // ProcessUrlRow(fileRow);
         }
 
 
-        private void StartDownload(FileRow fileRow, string url)
-        {
-            if (RadioHelpers.IsUrlToIRadioDownload(url))
-            {
-                StartDownloadFromDownloadUrl(fileRow, url);
-            }
-            else if (RadioHelpers.IsUrlToIRadioPlayPage(url))
-            {
-                StartDownloadFromStreamUrl(fileRow, url);
-            }
-            else if (RadioHelpers.IsUrlToVltavaPlay(url))
-            {
-                StartDownloadFromVltavaPlayUrl(fileRow, url);
-            }
-            else if (RadioHelpers.IsUrlToPrehrat2018(url))
-            {
-                StartDownloadFromPrehrat2018Url(fileRow, url);
-            }
-            else
-            {
-                fileRow.AddLog(string.Format("Neznámé url: {0}.", url));
-            }
-        }
+        ///// <summary>
+        ///// zahaji zpracovani radku pro dotazenou url
+        ///// </summary>
+        //private void ProcessUrlRow(FileRow fileRow)
+        //{
+        //    Files.Insert(0, fileRow);
+        //    fileRow.AddLog("Stahuji stránku pořadu.", FileRowState.Started);
+
+        //    StartDownload(fileRow);
+        //}
 
 
-        private async void StartDownloadFromPrehrat2018Url(FileRow fileRow, string url)
+        private async void StartDownload(FileRow fileRow)
         {
             var asyncDownloader = new AsyncDownloader();
-            var downloader = await asyncDownloader.GetString(url);
+            var downloader = await  asyncDownloader.GetString(fileRow.UrlPage);
+            if (downloader.DownloadOk)
+            {
+
+            }
+                //if (RadioHelpers.IsUrlToIRadioDownload(url))
+                //{
+                //    StartDownloadFromDownloadUrl(fileRow, url);
+                //}
+                //else if (RadioHelpers.IsUrlToIRadioPlayPage(url))
+                //{
+                //    StartDownloadFromStreamUrl(fileRow, url);
+                //}
+                //else if (RadioHelpers.IsUrlToVltavaPlay(url))
+                //{
+                //    StartDownloadFromVltavaPlayUrl(fileRow, url);
+                //}
+                //else if (RadioHelpers.IsUrlToPrehrat2018(url))
+                //{
+                //    StartDownloadFromPrehrat2018Url(fileRow, url);
+                //}
+                //else
+                //{
+                //    fileRow.AddLog(string.Format("Neznámé url: {0}.", url));
+                //}
+                if (fileRow == null)
+                return;
+
+            var decoder = await parsers.Chain.CanDecodeUrl(fileRow.UrlPage);
+            if(decoder == null)
+            {
+                fileRow.AddLog($"Nepodařilo se dohledat dekoder pro url: {fileRow.UrlPage}.");
+                return;
+            }
+
+            var decoderResult = await decoder.Decode(fileRow.UrlPage);
+            if (decoderResult == null)
+            {
+                fileRow.AddLog($"Dekoder '{decoder?.GetType()?.FullName}' nevrátil žádná data pro url: {fileRow.UrlPage}");
+                return;
+            }
+
+
+            if (decoderResult.LogSet.Any())
+            {
+                decoderResult.LogSet.ForEach(p => fileRow.AddLog(p));
+                return;
+            }
+
+            if (!decoderResult.RozhlasUrlSet.Any())
+            {
+                fileRow.AddLog($"Dekoder '{decoder?.GetType()?.FullName}' nevrátil seznam url pro: {fileRow.UrlPage}");
+                return;
+            }
+
+            fileRow.UrlDownload = decoderResult.RozhlasUrlSet[0].Url;
+            fileRow.UrlDownloadNo = 0;
+            DownloadMp3Stream(fileRow);
+
+            if(decoderResult.RozhlasUrlSet.Count > 1)
+            {
+                for (int i = 1; i < decoderResult.RozhlasUrlSet.Count; i++)
+                {
+                    var fr = new FileRow(Files, fileRow.UrlPage);
+                    fr.UrlDownload = decoderResult.RozhlasUrlSet[i].Url;
+                    fr.UrlDownloadNo = i;
+                    fr.AddLog("Založen sub-download.");
+                    Files.Add(fr);
+                    DownloadMp3Stream(fr);
+                }
+            }
+        }
+
+
+        private async void StartDownloadFromPrehrat2018Url(FileRow fileRow)
+        {
+            var asyncDownloader = new AsyncDownloader();
+            var downloader = await asyncDownloader.GetString(fileRow.UrlPage);
             if (downloader.DownloadOk)
             {
                 var parserResult = new RadioHtmlParser().ParsePrehrat2018Html(downloader.Output);
 
                 if(!parserResult.Log.Any())
                 {
-                    if (parserResult.Urls.Any())
+                    
+                    if (!string.IsNullOrEmpty(fileRow.UrlPage))
                     {
-                        // no errors - go to download - process all parsed urls (and use existing FileRow for first url)
-
-                        // first file
-                        fileRow.Url = parserResult.Urls[0];
                         DownloadMp3Stream(fileRow);
 
-                        // jen jeden soubor nebo vice?
-                        if (parserResult.Urls.Count() > 1)
-                        {
-                            fileRow.GroupOrder = 1;
-
-                            // second and next files ... if exists
-                            for (int i = 1; i < parserResult.Urls.Count; i++)
-                            {
-                                var fr = new FileRow(Files, parserResult.Urls[i])
-                                {
-                                    GroupOrder = i + 1
-                                };
-                                Files.Add(fr);
-                                DownloadMp3Stream(fr);
-                            }
-                        }
                     }
                 }
                 else
@@ -307,6 +342,8 @@ namespace RadioOwl.ViewModels
         /// <summary>
         /// drag-dropnute url z javascript playeru z webu Vltavy (zatim) - je nutne stahnout html a dohledat link na mp3 stream
         /// </summary>
+        /// <param name="fileRow"></param>
+        /// <param name="url"></param>
         private async void StartDownloadFromVltavaPlayUrl(FileRow fileRow, string url)
         {
             var asyncDownloader = new AsyncDownloader();
@@ -314,7 +351,7 @@ namespace RadioOwl.ViewModels
             if (downloader.DownloadOk)
             {
                 ParseVltavaStyleHtmlPage(fileRow, downloader.Output);
-                if (!string.IsNullOrEmpty(fileRow.Url))
+                if (!string.IsNullOrEmpty(fileRow.UrlPage))
                 {
                     DownloadMp3Stream(fileRow);
                 }
@@ -328,8 +365,8 @@ namespace RadioOwl.ViewModels
 
         private void StartDownloadFromDownloadUrl(FileRow fileRow, string url)
         {
-            fileRow.Url = url;
-            fileRow.Id = RadioHelpers.GetStreamIdFromUrl(fileRow.Url);
+            fileRow.UrlPage = url;
+            fileRow.Id = RadioHelpers.GetStreamIdFromUrl(fileRow.UrlPage);
             DownloadMp3Stream(fileRow);
         }
 
@@ -339,7 +376,7 @@ namespace RadioOwl.ViewModels
             fileRow.Id = RadioHelpers.GetStreamIdFromUrl(streamUrl);
             if (!string.IsNullOrEmpty(fileRow.Id))
             {
-                fileRow.Url = RadioHelpers.GetIRadioMp3Url(fileRow.Id);
+                fileRow.UrlPage = RadioHelpers.GetIRadioMp3Url(fileRow.Id);
                 DownloadMp3Stream(fileRow);
             }
             else
@@ -365,14 +402,14 @@ namespace RadioOwl.ViewModels
                 if(vltavaAnchorNode != null)
                 {
                     // povedlo se dohledat <a>, vykousnu href atribut a je to
-                    fileRow.Url = vltavaAnchorNode.GetAttributeValueByName("HREF");
+                    fileRow.UrlPage = vltavaAnchorNode.GetAttributeValueByName("HREF");
                     // ID v tomhle pripade nemam
                     fileRow.Id = "?";
                     // title jen vykousnu ze stranky
                     fileRow.Title = VltavaPageFindTitle(htmlDoc, @"//meta[@property='og:title']");
                 }
 
-                if (string.IsNullOrEmpty(fileRow.Url))
+                if (string.IsNullOrEmpty(fileRow.UrlPage))
                 {
                     fileRow.AddLog("Chyba při parsování stránky pořadu - nepodařilo se dohledat URL streamu.", FileRowState.Error);
                     return;
@@ -385,14 +422,56 @@ namespace RadioOwl.ViewModels
         }
 
 
+        ///// <summary>
+        ///// rozparsovani html stranky poradu
+        ///// </summary>
+        //private void ParseIRadioHtmlPage(FileRow fileRow, string html) 
+        //{
+        //    try
+        //    {
+        //        // html nemusi byt validni xml, takze je potreba pro parsovani pouzit Html Agility Pack, viz http://htmlagilitypack.codeplex.com/
+        //        // http://www.c-sharpcorner.com/UploadFile/9b86d4/getting-started-with-html-agility-pack/
+        //        var htmlDoc = new HtmlDocument();
+        //        htmlDoc.LoadHtml(html);
+
+        //        // <div id="player-track" class="player uniplayer" data-mode="audio" data-type="ondemand" data-autostart="1" data-id="3696063" data-event_label="Glosa [3696063]" data-duration="99" data-primary="html5" data-debug="1"></div>
+        //        fileRow.Id = FindAttributeValue(htmlDoc, @"//div[@id='player-track']", "data-id");
+
+        //        // <meta name="og:title" content="Dvojka - Glosa (01.09.2016 06:22)">
+        //        fileRow.StreamName = FindAttributeValue(htmlDoc, @"//meta[@name='og:title']", "content");
+
+        //        // <p title="Marie Procházková: Paralínek (1/6). Paralínek se učí létat. Malý ptáček Paralínek bydlí v hnízdě ...
+        //        fileRow.Title = FindAttributeValue(htmlDoc, @"//body//div/p[@title]", "title");
+
+        //        if (string.IsNullOrEmpty(fileRow.Id))
+        //        {
+        //            fileRow.AddLog("Chyba při parsování stránky pořadu - nepodařilo se dohledat ID streamu.", FileRowState.Error);
+        //            return;
+        //        }
+        //        if (string.IsNullOrEmpty(fileRow.StreamName))
+        //        {
+        //            fileRow.AddLog("Chyba při parsování stránky pořadu - nepodařilo se dohledat TITLE pořadu.", FileRowState.Error);
+        //            return;
+        //        }
+
+        //        var streamUrl = RadioHelpers.GetIRadioMp3Url(fileRow.Id);
+        //        DownloadMp3Stream(fileRow, streamUrl);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        fileRow.AddLog(string.Format("Chyba při stahování streamu: {0}.", ex.Message), FileRowState.Error);
+        //    }
+        //}
+
+
         private async void DownloadMp3Stream(FileRow fileRow)
         {
-            fileRow.AddLog(string.Format("Stahuji stream: {0}", fileRow.Url));
+            fileRow.AddLog(string.Format("Stahuji stream: {0}", fileRow.UrlPage));
 
             GetId3Tags(fileRow);
 
             var asyncDownloader = new AsyncDownloader();
-            var output = await asyncDownloader.GetData(fileRow.Url,
+            var output = await asyncDownloader.GetData(fileRow.UrlPage,
                                                        p =>
                                                        {
                                                            fileRow.Progress = p.ProgressPercentage;
@@ -416,7 +495,7 @@ namespace RadioOwl.ViewModels
         /// </summary>
         private async void GetId3Tags(FileRow fileRow)
         {
-            var data = await new AsyncDownloader().GetDataRange(fileRow.Url, 0, 4096);
+            var data = await new AsyncDownloader().GetDataRange(fileRow.UrlPage, 0, 4096);
             if (data.DownloadOk)
             {
                 var id3Tags = new Id3Tags(data.Output);
@@ -433,7 +512,7 @@ namespace RadioOwl.ViewModels
             }
             else
             {
-                fileRow.AddLog(string.Format("Nepodařilo se načíst Id3 tagy ze streamu: {0}.", fileRow.Url));
+                fileRow.AddLog(string.Format("Nepodařilo se načíst Id3 tagy ze streamu: {0}.", fileRow.UrlPage));
             }
         }
 
