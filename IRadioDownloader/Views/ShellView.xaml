@@ -78,7 +78,9 @@
                   cal:Message.Attach="[Event Drop] = [Action EventDrop($eventArgs)];
                                       [Event PreviewDragOver] = [Action EventPreviewDragOver($eventArgs)];" >
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Url" Binding="{Binding Url, Mode=OneWay}" Width="160"/>
+                <DataGridTextColumn Header="UrlPage" Binding="{Binding UrlPage, Mode=OneWay}" Width="160"/>
+                <DataGridTextColumn Header="UrlDownload" Binding="{Binding UrlDownload, Mode=OneWay}" Width="160"/>
+                <DataGridTextColumn Header="UrlDownloadNo" Binding="{Binding UrlDownloadNo, Mode=OneWay}" Width="160"/>
                 <DataGridTextColumn Header="Id" Binding="{Binding Id, Mode=OneWay}" Width="70"/>
                 <DataGridTextColumn Header="Pořad" Binding="{Binding Album}" Width="200"/>
                 <DataGridTextColumn Header="Titulek" Binding="{Binding Title}" Width="440"/>

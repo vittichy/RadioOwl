@@ -14,13 +14,35 @@ namespace RadioOwl.Data
         /// </summary>
         private readonly IList<FileRow> ParentList;
 
-        private string _url;
-        public string Url
+        private string _urlPage;
+        public string UrlPage
         {
-            get { return _url; }
+            get { return _urlPage; }
             set
             {
-                _url = value;
+                _urlPage = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string _urlDownload;
+        public string UrlDownload
+        {
+            get { return _urlDownload; }
+            set
+            {
+                _urlDownload = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private int _urlDownloadNo;
+        public int UrlDownloadNo
+        {
+            get { return _urlDownloadNo; }
+            set
+            {
+                _urlDownloadNo = value;
                 OnPropertyChanged();
             }
         }
@@ -168,12 +190,12 @@ namespace RadioOwl.Data
         }
 
 
-        public FileRow(IList<FileRow> parentList, string url)
+        public FileRow(IList<FileRow> parentList, string urlPage)
         {
             ParentList = parentList;
             State = FileRowState.Started;
             LogList = new List<string>();
-            Url = url;
+            UrlPage = urlPage;
         }
 
         public FileRow(IList<FileRow> parentList, StreamUrlRow streamUrlRow) : this(parentList, streamUrlRow?.Url)
