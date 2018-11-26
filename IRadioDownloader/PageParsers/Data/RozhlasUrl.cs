@@ -10,6 +10,7 @@ namespace RadioOwl.PageParsers.Data
     {
         public string Url;
         public string Description;
-        public string Stanice;
+        public string Title;
+        public string SiteName;
     }
 }

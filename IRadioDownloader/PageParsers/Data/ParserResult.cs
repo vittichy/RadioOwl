@@ -8,9 +8,17 @@ namespace RadioOwl.PageParsers.Data
 {
     public class ParserResult
     {
+        public readonly string SourceHtml;
+
         public List<RozhlasUrl> RozhlasUrlSet = new List<RozhlasUrl>();
 
         public List<string> LogSet = new List<string>();
+
+
+        public ParserResult(string sourceHtml)
+        {
+            SourceHtml = sourceHtml;
+        }
 
 
         public ParserResult AddLog(string logMsg)

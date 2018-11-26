@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using RadioOwl.Data;
+using RadioOwl.PageParsers;
 using RadioOwl.Radio;
 using System;
 using System.Collections.Generic;
@@ -9,23 +10,24 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RadioOwlTests.Radio
+namespace RadioOwlTests.PageParsers
 {
-
     [TestFixture]
-    public class RadioHelpersTests : TestBase
+    public class RozhlasStahnout2018PageDecoderTestsXXXXX : TestBase
     {
         [Test]
         public void IsUrlToPrehrat2018Tests()
         {
-            var result = RadioHelpers.IsUrlToPrehrat2018(null);
-            Assert.IsFalse(result);
+            var parser = new RozhlasStahnout2018PageParser();
 
-            result = RadioHelpers.IsUrlToPrehrat2018(string.Empty);
-            Assert.IsFalse(result);
+            //var result = parser.Parse(null);
+            //Assert.IsFalse(result);
 
-            result = RadioHelpers.IsUrlToPrehrat2018("xxxx");
-            Assert.IsFalse(result);
+            //result = RadioHelpers.IsUrlToPrehrat2018(string.Empty);
+            //Assert.IsFalse(result);
+
+            //result = RadioHelpers.IsUrlToPrehrat2018("xxxx");
+            //Assert.IsFalse(result);
 
             // ok urls
             var urls = new string[]
@@ -55,23 +57,25 @@ namespace RadioOwlTests.Radio
         // RozhlasStahnout2018PageDecoder
 
 
+
+
+
         [Test]
-        public void XXXXX()
+        public void IsUrlToPrehrat2018TestsWWWWWWWWWWWW()
         {
             var html = GetEmbeddedResource("Prehrat2018_01.html");
-            new RadioHtmlParser().ParsePrehrat2018Html(html);
 
-            ////D:\vt-src\RadioOwl\RadioOwlTests\TestData\Prehrat2018_01.html
-            //var assembly = Assembly.GetExecutingAssembly();
-            //using (var stream = assembly.GetManifestResourceStream("RadioOwlTests.TestData.Prehrat2018_01.html"))
-            //using (var reader = new StreamReader(stream))
-            //{
-            //    string text = reader.ReadToEnd();
-            //}
+            var parser = new RozhlasStahnout2018PageParser();
+            //var result = parser.Decode()
+            //    //RadioHtmlParser().ParsePrehrat2018Html(html);
 
-
+            //Assert.IsNotNull(result);
+            //Assert.IsNotNull(result.Log);
+            //Assert.IsNotNull(result.Urls);
+            //Assert.AreEqual(0, result.Log.Count);
+            //Assert.AreEqual(2, result.Urls.Count);
+            //Assert.IsFalse(string.IsNullOrEmpty(result.Title));
 
         }
-
     }
 }
