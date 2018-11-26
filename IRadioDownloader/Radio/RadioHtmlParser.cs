@@ -3,7 +3,6 @@ using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
 using RadioOwl.Data;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace RadioOwl.Radio
@@ -14,18 +13,17 @@ namespace RadioOwl.Radio
         {
             var result = new Prehrat2018ParseResult();
 
-            // TODO zde muze byt vice url ... takze to nejak doplnit do toho gridu? a pocitat s tim, ze jich bude vice
-            // - mozna jen upravit fileRow.url na list? 
-            // TODO - stare musim ponechat! aby slo stahovat stare veci!
             try
             {
                 // html nemusi byt validni xml, takze je potreba pro parsovani pouzit Html Agility Pack
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
 
+                // title jen vykousnu ze stranky
+                GetTitleFromH1(htmlDoc, ref result);
+                                                                      
                 // get all  <script> under <head>
                 var xpathNodes = htmlDoc.DocumentNode.SelectNodes(@"//head//script");
-
                 if (xpathNodes != null && xpathNodes.Any())
                 {
                     var drupalSettingsJson = xpathNodes.FirstOrDefault(p => p.InnerText.Contains("jQuery.extend(Drupal.settings"))?.InnerText;
@@ -38,7 +36,7 @@ namespace RadioOwl.Radio
                         var jObject = JObject.Parse(json);
 
                         //  ajaxPageState "soundmanager2":{
-                        var downloadItem = jObject.SelectToken("soundmanager2.download");
+                        var downloadItem = jObject.SelectToken("soundmanager2.playtime");
                         if (downloadItem != null)
                         {
                             foreach (JToken item in downloadItem.Children())
@@ -56,6 +54,24 @@ namespace RadioOwl.Radio
                                 }
                             }
                         }
+
+                        // nektere 'prehrat' html stranky nemaji prehravac s json daty a mp3 url musim dohledat jinde ve strance
+                        if (!result.Urls.Any())
+                        {
+                            // najit prislusny div
+                            var parentDiv = htmlDoc.DocumentNode.SelectSingleNode(@"//div[@aria-labelledby='Audio part']");
+                            // pod nim by mel byt jeden <a> s href atributem - url k mp3
+                            if(parentDiv != null)
+                            {
+                                var aHref = parentDiv.ChildNodes.FirstOrDefault(p => p.Name == "a")?.Attributes["href"]?.Value;
+                                if (!string.IsNullOrEmpty(aHref))
+                                {
+                                    result.Urls.Add(aHref);
+                                }
+                            }
+                        }
+
+                        // po vsechn pokusech nic nenalezeno?
                         if (!result.Urls.Any())
                         {
                             result.Log.Add("Chyba při parsování html - nepodařilo se dohledat seznam url z json dat.");
@@ -77,6 +93,27 @@ namespace RadioOwl.Radio
             }
 
             return result;
+        }
+
+                 
+        /// <summary>
+        /// dohledani informaci o poradu z meta tagu html
+        /// </summary>
+        private void GetTitleFromH1(HtmlDocument htmlDoc, ref Prehrat2018ParseResult prehrat2018ParseResult)
+        {
+            prehrat2018ParseResult.Title = GetMetaTagContent(htmlDoc, @"//meta[@property='og:title']");
+            // <meta property="og:description" content="Poslechněte si oblíbené poetické texty básníka a publicisty Milana Šedivého." />
+            prehrat2018ParseResult.Description = GetMetaTagContent(htmlDoc, @"//meta[@property='og:description']");
+            // <meta property="og:site_name" content="Vltava" />
+            prehrat2018ParseResult.SiteName = GetMetaTagContent(htmlDoc, @"//meta[@property='og:site_name']");
+        }
+
+
+        private string GetMetaTagContent(HtmlDocument htmlDoc, string xPath)
+        {
+            var xpathNodes = htmlDoc.DocumentNode.SelectNodes(xPath);
+            var contentAttribute = xpathNodes?.FirstOrDefault()?.Attributes["content"]?.Value;
+            return contentAttribute;
         }
     }
 }

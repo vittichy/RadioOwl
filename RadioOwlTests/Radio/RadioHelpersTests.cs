@@ -16,7 +16,7 @@ namespace RadioOwlTests.Radio
     public class RadioHelpersTests : TestBase
     {
         [Test]
-        public void IsUrlToPrehrat2018Tests()
+        public void IsUrlToPrehrat2018_Tests()
         {
             var result = RadioHelpers.IsUrlToPrehrat2018(null);
             Assert.IsFalse(result);
@@ -53,24 +53,79 @@ namespace RadioOwlTests.Radio
         }
 
 
+        [Test]
+        public void ParsePrehrat2018Html_Tests1()
+        {
+            var html = GetEmbeddedResource("Prehrat2018_01.html");
+            var result = new RadioHtmlParser().ParsePrehrat2018Html(html);
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Log);
+            Assert.IsNotNull(result.Urls);
+            Assert.AreEqual(0, result.Log.Count);
+            Assert.AreEqual(2, result.Urls.Count);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Title));
+        }
 
 
         [Test]
-        public void XXXXX()
+        public void ParsePrehrat2018Html_Tests2()
         {
-            var html = GetEmbeddedResource("Prehrat2018_01.html");
-            new RadioHtmlParser().ParsePrehrat2018Html(html);
+            var html = GetEmbeddedResource("Prehrat2018_02.html"); // pozor Prehrat2018_02 ma nevalidny cestinu! takze netestuj title atd
+            var result = new RadioHtmlParser().ParsePrehrat2018Html(html);
 
-            ////D:\vt-src\RadioOwl\RadioOwlTests\TestData\Prehrat2018_01.html
-            //var assembly = Assembly.GetExecutingAssembly();
-            //using (var stream = assembly.GetManifestResourceStream("RadioOwlTests.TestData.Prehrat2018_01.html"))
-            //using (var reader = new StreamReader(stream))
-            //{
-            //    string text = reader.ReadToEnd();
-            //}
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Log);
+            Assert.IsNotNull(result.Urls);
+            Assert.AreEqual(0, result.Log.Count);
+            Assert.AreEqual(5, result.Urls.Count);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Title));
+        }
 
 
+        [Test]
+        public void ParsePrehrat2018Html_Tests3()
+        {
+            var html = GetEmbeddedResource("Prehrat2018_03.html");
+            var result = new RadioHtmlParser().ParsePrehrat2018Html(html);
 
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Log);
+            Assert.IsNotNull(result.Urls);
+            Assert.AreEqual(0, result.Log.Count);
+            Assert.AreEqual(5, result.Urls.Count);
+            Assert.AreEqual("BáSnění Milana Šedivého", result.Title);
+        }
+
+
+        [Test]
+        public void ParsePrehrat2018Html_Tests4()
+        {
+            var html = GetEmbeddedResource("Prehrat2018_04.html");
+            var result = new RadioHtmlParser().ParsePrehrat2018Html(html);
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Log);
+            Assert.IsNotNull(result.Urls);
+            Assert.AreEqual(0, result.Log.Count);
+            Assert.AreEqual(7, result.Urls.Count);
+            Assert.AreEqual("Lucie Výborná: Mise Afghánistán", result.Title);
+        }
+
+
+        [Test]
+        public void ParsePrehrat2018Html_Tests5()
+        {
+            // html je z odkazu 'Prehrat', ale neobsahuje odkazu v jsonu
+            var html = GetEmbeddedResource("Prehrat2018_05.html");
+            var result = new RadioHtmlParser().ParsePrehrat2018Html(html);
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Log);
+            Assert.IsNotNull(result.Urls);
+            Assert.AreEqual(0, result.Log.Count);
+            Assert.AreEqual(1, result.Urls.Count);
+            //Assert.AreEqual("BáSnění Milana Šedivého", result.Title);
         }
 
     }

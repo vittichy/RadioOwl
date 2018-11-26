@@ -10,9 +10,13 @@ namespace RadioOwl.Data
     public class FileRow :  PropertyChangedBase
     {
         /// <summary>
-        /// 
+        /// parent collection of all FileRows (source of datagrid)
         /// </summary>
         private readonly IList<FileRow> ParentList;
+
+        public FileRow Group;
+
+        public int GroupOrder;
 
         private string _url;
         public string Url

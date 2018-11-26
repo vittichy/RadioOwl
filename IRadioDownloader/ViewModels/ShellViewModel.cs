@@ -3,6 +3,7 @@ using RadioOwl.Data;
 using RadioOwl.Id3;
 using RadioOwl.Radio;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -264,11 +265,30 @@ namespace RadioOwl.ViewModels
 
                 if(!parserResult.Log.Any())
                 {
-                    if
-                    if (!string.IsNullOrEmpty(fileRow.Url))
+                    if (parserResult.Urls.Any())
                     {
+                        // no errors - go to download - process all parsed urls (and use existing FileRow for first url)
+
+                        // first file
+                        fileRow.Url = parserResult.Urls[0];
                         DownloadMp3Stream(fileRow);
 
+                        // jen jeden soubor nebo vice?
+                        if (parserResult.Urls.Count() > 1)
+                        {
+                            fileRow.GroupOrder = 1;
+
+                            // second and next files ... if exists
+                            for (int i = 1; i < parserResult.Urls.Count; i++)
+                            {
+                                var fr = new FileRow(Files, parserResult.Urls[i])
+                                {
+                                    GroupOrder = i + 1
+                                };
+                                Files.Add(fr);
+                                DownloadMp3Stream(fr);
+                            }
+                        }
                     }
                 }
                 else
@@ -287,8 +307,6 @@ namespace RadioOwl.ViewModels
         /// <summary>
         /// drag-dropnute url z javascript playeru z webu Vltavy (zatim) - je nutne stahnout html a dohledat link na mp3 stream
         /// </summary>
-        /// <param name="fileRow"></param>
-        /// <param name="url"></param>
         private async void StartDownloadFromVltavaPlayUrl(FileRow fileRow, string url)
         {
             var asyncDownloader = new AsyncDownloader();
@@ -365,48 +383,6 @@ namespace RadioOwl.ViewModels
                 fileRow.AddLog(string.Format("Chyba při stahování streamu: {0}.", ex.Message), FileRowState.Error);
             }
         }
-
-
-        ///// <summary>
-        ///// rozparsovani html stranky poradu
-        ///// </summary>
-        //private void ParseIRadioHtmlPage(FileRow fileRow, string html) 
-        //{
-        //    try
-        //    {
-        //        // html nemusi byt validni xml, takze je potreba pro parsovani pouzit Html Agility Pack, viz http://htmlagilitypack.codeplex.com/
-        //        // http://www.c-sharpcorner.com/UploadFile/9b86d4/getting-started-with-html-agility-pack/
-        //        var htmlDoc = new HtmlDocument();
-        //        htmlDoc.LoadHtml(html);
-
-        //        // <div id="player-track" class="player uniplayer" data-mode="audio" data-type="ondemand" data-autostart="1" data-id="3696063" data-event_label="Glosa [3696063]" data-duration="99" data-primary="html5" data-debug="1"></div>
-        //        fileRow.Id = FindAttributeValue(htmlDoc, @"//div[@id='player-track']", "data-id");
-
-        //        // <meta name="og:title" content="Dvojka - Glosa (01.09.2016 06:22)">
-        //        fileRow.StreamName = FindAttributeValue(htmlDoc, @"//meta[@name='og:title']", "content");
-
-        //        // <p title="Marie Procházková: Paralínek (1/6). Paralínek se učí létat. Malý ptáček Paralínek bydlí v hnízdě ...
-        //        fileRow.Title = FindAttributeValue(htmlDoc, @"//body//div/p[@title]", "title");
-
-        //        if (string.IsNullOrEmpty(fileRow.Id))
-        //        {
-        //            fileRow.AddLog("Chyba při parsování stránky pořadu - nepodařilo se dohledat ID streamu.", FileRowState.Error);
-        //            return;
-        //        }
-        //        if (string.IsNullOrEmpty(fileRow.StreamName))
-        //        {
-        //            fileRow.AddLog("Chyba při parsování stránky pořadu - nepodařilo se dohledat TITLE pořadu.", FileRowState.Error);
-        //            return;
-        //        }
-
-        //        var streamUrl = RadioHelpers.GetIRadioMp3Url(fileRow.Id);
-        //        DownloadMp3Stream(fileRow, streamUrl);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        fileRow.AddLog(string.Format("Chyba při stahování streamu: {0}.", ex.Message), FileRowState.Error);
-        //    }
-        //}
 
 
         private async void DownloadMp3Stream(FileRow fileRow)
