@@ -129,7 +129,7 @@ namespace RadioOwl.ViewModels
         public void EventPreviewDragOver(DragEventArgs e)
         {
             var url = GetPageUrl(e);
-            var parser = parsers.Chain.CanDecodeUrl(url);
+            var parser = parsers.Chain.CanParse(url);
             e.Effects = (parser != null) ? DragDropEffects.Copy : DragDropEffects.None;
             e.Handled = true;
         }
@@ -263,14 +263,14 @@ namespace RadioOwl.ViewModels
                 if (fileRow == null)
                 return;
 
-            var decoder = await parsers.Chain.CanDecodeUrl(fileRow.UrlPage);
+            var decoder = await parsers.Chain.CanParse(fileRow.UrlPage);
             if(decoder == null)
             {
                 fileRow.AddLog($"Nepodařilo se dohledat dekoder pro url: {fileRow.UrlPage}.");
                 return;
             }
 
-            var decoderResult = await decoder.Decode(fileRow.UrlPage);
+            var decoderResult = await decoder.Parse(fileRow.UrlPage);
             if (decoderResult == null)
             {
                 fileRow.AddLog($"Dekoder '{decoder?.GetType()?.FullName}' nevrátil žádná data pro url: {fileRow.UrlPage}");
