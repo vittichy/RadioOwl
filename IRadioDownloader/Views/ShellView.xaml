@@ -20,12 +20,12 @@
                         <TextBlock VerticalAlignment="Center" Margin="3,0,10,0" >Načíst z URL</TextBlock>
                     </StackPanel>
                 </Button>
-                <Button Name="SniffAround" IsEnabled="False" >
+                <!--<Button Name="SniffAround" IsEnabled="False" >
                     <StackPanel Orientation="Horizontal">
                         <Image Source="/RadioOwl;component/icons/glyphicons-10-magic.png" />
                         <TextBlock VerticalAlignment="Center" Margin="3,0,10,0" >Očuchat okolní ID</TextBlock>
                     </StackPanel>
-                </Button>
+                </Button>-->
                 <!--<Button Name="OpenSettings" IsEnabled="False">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="/RadioOwl;component/icons/glyphicons-281-settings.png" />
@@ -78,9 +78,9 @@
                   cal:Message.Attach="[Event Drop] = [Action EventDrop($eventArgs)];
                                       [Event PreviewDragOver] = [Action EventPreviewDragOver($eventArgs)];" >
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Html link" Binding="{Binding UrlPage, Mode=OneWay}" Width="160"/>
-                <DataGridTextColumn Header="Mp3 link" Binding="{Binding UrlDownload, Mode=OneWay}" Width="160"/>
-                <DataGridTextColumn Header="Mp3 link no" Binding="{Binding UrlDownloadNo, Mode=OneWay}" Width="15"/>
+                <DataGridTextColumn Header="Html" Binding="{Binding UrlPage, Mode=OneWay}" Width="160"/>
+                <DataGridTextColumn Header="Audio" Binding="{Binding UrlMp3Download, Mode=OneWay}" Width="160"/>
+                <DataGridTextColumn Header="#" Binding="{Binding UrlMp3DownloadNo, Mode=OneWay}" Width="15"/>
 
                 <DataGridTemplateColumn Header="Průběh" Width="100">
                     <DataGridTemplateColumn.CellTemplate>
@@ -95,9 +95,9 @@
 
                 <!-- TODO delete? <DataGridTextColumn Header="Id" Binding="{Binding Id, Mode=OneWay}" Width="70"/>-->
 
-                <DataGridTextColumn Header="Name" Binding="{Binding Id3NameSite}" Width="100"/>
-                <DataGridTextColumn Header="Name" Binding="{Binding Id3Name}" Width="200"/>
-                <DataGridTextColumn Header="Name-Part" Binding="{Binding Id3NamePart}" Width="200"/>
+                <DataGridTextColumn Header="Stanice" Binding="{Binding Id3NameSite}" Width="100"/>
+                <DataGridTextColumn Header="Pořad" Binding="{Binding Id3Name}" Width="200"/>
+                <DataGridTextColumn Header="Název" Binding="{Binding Id3NamePart}" Width="200"/>
                 <DataGridTemplateColumn Header="Log" Width="200">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

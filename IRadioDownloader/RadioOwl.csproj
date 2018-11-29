@@ -54,7 +54,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>1477096738_owl.ico</ApplicationIcon>
+    <ApplicationIcon>owl_horror_witch_halloween.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -155,7 +155,7 @@
     <Compile Include="PageParsers\Data\ParserResult.cs" />
     <Compile Include="PageParsers\Data\RozhlasUrl.cs" />
     <Compile Include="PageParsers\Parsers.cs" />
-    <Compile Include="PageParsers\RozhlasStahnout2018PageParser.cs" />
+    <Compile Include="PageParsers\RozhlasPrehrat2017PageParser.cs" />
     <Compile Include="PageParsers\RozhlasPrehrat2018PageParser.cs" />
     <Compile Include="Radio\RadioHelpers.cs" />
     <Compile Include="Radio\RadioHtmlParser.cs" />
@@ -259,6 +259,15 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="icons\glyphicons-195-question-sign.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="owl_horror_witch_halloween.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="owl_horror_witch_halloween.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="iconfinder_Owl_3812747.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

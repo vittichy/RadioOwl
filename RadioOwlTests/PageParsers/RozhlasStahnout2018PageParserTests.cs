@@ -18,7 +18,7 @@ namespace RadioOwlTests.PageParsers
         [Test]
         public void IsUrlToPrehrat2018Tests()
         {
-            var parser = new RozhlasStahnout2018PageParser();
+            var parser = new RozhlasPrehrat2017PageParser();
 
             //var result = parser.Parse(null);
             //Assert.IsFalse(result);
@@ -65,7 +65,7 @@ namespace RadioOwlTests.PageParsers
         {
             var html = GetEmbeddedResource("Prehrat2018_01.html");
 
-            var parser = new RozhlasStahnout2018PageParser();
+            var parser = new RozhlasPrehrat2017PageParser();
             //var result = parser.Decode()
             //    //RadioHtmlParser().ParsePrehrat2018Html(html);
 

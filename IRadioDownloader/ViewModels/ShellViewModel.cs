@@ -15,6 +15,17 @@ using vt.Http;
 
 namespace RadioOwl.ViewModels
 {
+    /// <summary>
+    /// TODO
+    /// - statusy logu
+    /// - grid rozmery
+    /// -url se nedoplnuje
+    /// -rozumny format filenamu 
+    /// - mozna doplnoval id3?
+    /// -filename stripovat blbe znaky
+    /// 
+    /// - nektere odkazy jsou na WAV ne MP3: http://pardubice.rozhlas.cz/zaver-zivota-v-ustavu-ne-prectete-si-pribehy-tri-krehkych-bojovniku-7692592?player=on#player
+    /// </summary>
     class ShellViewModel : Caliburn.Micro.PropertyChangedBase
     {
         #region Consts
@@ -284,30 +295,34 @@ namespace RadioOwl.ViewModels
             if (mainFileRow == null || decoderResult == null || !decoderResult.RozhlasUrlSet.Any())
                 return;
 
+            var isMultipart = (decoderResult.RozhlasUrlSet.Count > 1);
+
             // first or main download link
-            DownloadMp3StreamStart(mainFileRow, decoderResult.RozhlasUrlSet[0], 0, "Založen main-download.");
+            DownloadMp3StreamStart(mainFileRow, isMultipart, decoderResult.RozhlasUrlSet[0], (isMultipart ? 1 : default(int?)), "Založen main-download.");
 
             // next download links... (more part on one html page)
-            if (decoderResult.RozhlasUrlSet.Count > 1)
+            if (isMultipart)
             {
                 for (int i = 1; i < decoderResult.RozhlasUrlSet.Count; i++)
                 {
                     var subFileRow = new FileRow(Files, mainFileRow.UrlPage);
                     Files.Add(subFileRow);
 
-                    DownloadMp3StreamStart(subFileRow, decoderResult.RozhlasUrlSet[i], i, $"Založen sub-download #{i}.");
+                    DownloadMp3StreamStart(subFileRow, true, decoderResult.RozhlasUrlSet[i], i + 1, $"Založen sub-download #{i}.");
                 }
             }
         }
         
 
-        private void DownloadMp3StreamStart(FileRow fileRow, RozhlasUrl rozhlasUrl, int mp3No, string logMessage)
+        private void DownloadMp3StreamStart(FileRow fileRow, bool isMultipart, RozhlasUrl rozhlasUrl, int? partNo, string logMessage)
         {
             if (fileRow == null)
                 return;
 
+            fileRow.IsMultiPart = isMultipart;
+
             fileRow.UrlMp3Download = rozhlasUrl.Url;
-            fileRow.UrlMp3DownloadNo = mp3No;
+            fileRow.UrlMp3DownloadNo = partNo;
 
             fileRow.Id3NameSite = rozhlasUrl.SiteName;
             fileRow.Id3Name = rozhlasUrl.Title;
@@ -543,7 +558,7 @@ namespace RadioOwl.ViewModels
         /// <summary>
         /// sestrojeni filename z id3 tagu - pokud by v row jeste nebyly, doplnim je
         /// </summary>
-        private static string GetFileNameFromId3Tags(FileRow fileRow, byte[] data)
+        private  string GetFileNameFromId3Tags(FileRow fileRow, byte[] data)
         {
             //if(string.IsNullOrEmpty(fileRow.Id3Name) && string.IsNullOrEmpty(fileRow.Id3NamePart))
             //{
@@ -555,9 +570,26 @@ namespace RadioOwl.ViewModels
 
             // TODO nejake defaultni jmeno??
 
-            var fName = $"{fileRow.Id3NameSite}-{fileRow.Id3Name}-{fileRow.Id3NamePart}";
+            var fName = $"{GetStrOrDefault(fileRow.Id3NameSite, "Stanice")}-{GetStrOrDefault(fileRow.Id3Name, "Name")}";
 
+            if (fileRow.IsMultiPart)
+                fName += $"-{fileRow.UrlMp3DownloadNo:D2}";
+
+            fName += $"-{GetStrOrDefault(fileRow.Id3NamePart, "Part")}";
+           
             return fName;
+        }
+
+        private string GetSafeFilename(string filename)
+        {
+
+            return string.Join("_", filename.Split(Path.GetInvalidFileNameChars()));
+
+        }
+
+        private string GetStrOrDefault(string s, string defaultStr)
+        {
+            return string.IsNullOrWhiteSpace(s) ? defaultStr : GetSafeFilename(s.Trim());
         }
 
 

@@ -14,6 +14,8 @@ namespace RadioOwl.Data
         /// </summary>
         private readonly IList<FileRow> ParentList;
 
+        public bool IsMultiPart = false;
+
         private string _urlPage;
         /// <summary>
         /// main html page with links (for parsing)
@@ -42,18 +44,19 @@ namespace RadioOwl.Data
             }
         }
 
-        private int _urlMpcDownloadNo;
-        public int UrlMp3DownloadNo
+        private int? _urlMp3DownloadNo = null;
+        public int? UrlMp3DownloadNo
         {
-            get { return _urlMpcDownloadNo; }
+            get { return _urlMp3DownloadNo; }
             set
             {
-                _urlMpcDownloadNo = value;
+                _urlMp3DownloadNo = value;
                 OnPropertyChanged();
             }
         }
 
         private string _id;
+        // TODO delete?
         public string Id
         {
             get { return _id; }
