@@ -15,6 +15,9 @@ namespace RadioOwl.Data
         private readonly IList<FileRow> ParentList;
 
         private string _urlPage;
+        /// <summary>
+        /// main html page with links (for parsing)
+        /// </summary>
         public string UrlPage
         {
             get { return _urlPage; }
@@ -25,24 +28,27 @@ namespace RadioOwl.Data
             }
         }
 
-        private string _urlDownload;
-        public string UrlDownload
+        private string _urlMp3Download;
+        /// <summary>
+        /// url for mp3 file
+        /// </summary>
+        public string UrlMp3Download
         {
-            get { return _urlDownload; }
+            get { return _urlMp3Download; }
             set
             {
-                _urlDownload = value;
+                _urlMp3Download = value;
                 OnPropertyChanged();
             }
         }
 
-        private int _urlDownloadNo;
-        public int UrlDownloadNo
+        private int _urlMpcDownloadNo;
+        public int UrlMp3DownloadNo
         {
-            get { return _urlDownloadNo; }
+            get { return _urlMpcDownloadNo; }
             set
             {
-                _urlDownloadNo = value;
+                _urlMpcDownloadNo = value;
                 OnPropertyChanged();
             }
         }
@@ -71,29 +77,41 @@ namespace RadioOwl.Data
         }
 
 
-        private string _album;
-        public string Album
+        private string _id3Name;
+        public string Id3Name
         {
-            get { return _album; }
+            get { return _id3Name; }
             set
             {
-                _album = value;
+                _id3Name = value;
                 OnPropertyChanged();
             }
         }
 
 
-        private string _Title;
-        public string Title
+        private string _id3NamePart;
+        public string Id3NamePart
         {
-            get { return _Title; }
+            get { return _id3NamePart; }
             set
             {
-                _Title = value;
+                _id3NamePart = value;
                 OnPropertyChanged();
             }
         }
-        
+
+
+        private string _id3NameSite;
+        public string Id3NameSite
+        {
+            get { return _id3NameSite; }
+            set
+            {
+                _id3NameSite = value;
+                OnPropertyChanged();
+            }
+        }
+
 
         private FileRowState _state;
         public FileRowState State
@@ -200,7 +218,7 @@ namespace RadioOwl.Data
 
         public FileRow(IList<FileRow> parentList, StreamUrlRow streamUrlRow) : this(parentList, streamUrlRow?.Url)
         {
-            Title = streamUrlRow?.Title;
+            Id3NamePart = streamUrlRow?.Title;
         }
 
 
