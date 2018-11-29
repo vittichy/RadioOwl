@@ -9,7 +9,7 @@ namespace RadioOwl.PageParsers
         public Parsers()
         {
             Chain = new RozhlasPrehrat2018PageParser(
-                        new RozhlasStahnout2018PageParser());
+                        new RozhlasPrehrat2017PageParser());
         }
     }
 }

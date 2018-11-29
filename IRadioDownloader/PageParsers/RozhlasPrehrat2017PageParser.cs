@@ -11,9 +11,9 @@ using vt.Http;
 
 namespace RadioOwl.PageParsers
 {
-    public class RozhlasStahnout2018PageParser : PageParserBase, IPageParser
+    public class RozhlasPrehrat2017PageParser : PageParserBase, IPageParser
     {
-        public RozhlasStahnout2018PageParser(IPageParser next = null) : base(next) { }
+        public RozhlasPrehrat2017PageParser(IPageParser next = null) : base(next) { }
 
         //public Task<IPageParser> CanParse(string url)
         //{

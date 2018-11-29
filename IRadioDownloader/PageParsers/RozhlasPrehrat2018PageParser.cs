@@ -189,7 +189,10 @@ namespace RadioOwl.PageParsers
         {
             var xpathNodes = htmlDoc.DocumentNode.SelectNodes(xPath);
             var contentAttribute = xpathNodes?.FirstOrDefault()?.Attributes["content"]?.Value;
-            return contentAttribute;
+
+            // dencode char such &nbsp; as well (https://stackoverflow.com/questions/6665488/htmlagilitypack-and-htmldecode)
+            var deEntityzed = HtmlEntity.DeEntitize(contentAttribute);
+            return deEntityzed;
         }
     }
 }
