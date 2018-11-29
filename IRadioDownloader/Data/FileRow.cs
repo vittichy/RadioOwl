@@ -1,5 +1,4 @@
-﻿using RadioOwl.PageParsers.Data;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Windows.Media;
 using vt.Extensions;
 
@@ -11,12 +10,15 @@ namespace RadioOwl.Data
     public class FileRow :  PropertyChangedBase
     {
         /// <summary>
-        /// parent collection of all FileRows (source of datagrid)
+        /// 
         /// </summary>
         private readonly IList<FileRow> ParentList;
 
-        private string _url;
-        public string Url
+        private string _urlPage;
+        /// <summary>
+        /// main html page with links (for parsing)
+        /// </summary>
+        public string UrlPage
         {
             get { return _urlPage; }
             set
@@ -40,19 +42,18 @@ namespace RadioOwl.Data
             }
         }
 
-        //private int? _urlMp3DownloadNo = null;
-        //public int? UrlMp3DownloadNo
-        //{
-        //    get { return _urlMp3DownloadNo; }
-        //    set
-        //    {
-        //        _urlMp3DownloadNo = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
+        private int _urlMpcDownloadNo;
+        public int UrlMp3DownloadNo
+        {
+            get { return _urlMpcDownloadNo; }
+            set
+            {
+                _urlMpcDownloadNo = value;
+                OnPropertyChanged();
+            }
+        }
 
         private string _id;
-        // TODO delete?
         public string Id
         {
             get { return _id; }
@@ -76,40 +77,40 @@ namespace RadioOwl.Data
         }
 
 
-        //private string _id3Name;
-        //public string Id3Name
-        //{
-        //    get { return _id3Name; }
-        //    set
-        //    {
-        //        _id3Name = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
+        private string _id3Name;
+        public string Id3Name
+        {
+            get { return _id3Name; }
+            set
+            {
+                _id3Name = value;
+                OnPropertyChanged();
+            }
+        }
 
 
-        //private string _id3NamePart;
-        //public string Id3NamePart
-        //{
-        //    get { return _id3NamePart; }
-        //    set
-        //    {
-        //        _id3NamePart = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
+        private string _id3NamePart;
+        public string Id3NamePart
+        {
+            get { return _id3NamePart; }
+            set
+            {
+                _id3NamePart = value;
+                OnPropertyChanged();
+            }
+        }
 
 
-        //private string _id3NameSite;
-        //public string Id3NameSite
-        //{
-        //    get { return _id3NameSite; }
-        //    set
-        //    {
-        //        _id3NameSite = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
+        private string _id3NameSite;
+        public string Id3NameSite
+        {
+            get { return _id3NameSite; }
+            set
+            {
+                _id3NameSite = value;
+                OnPropertyChanged();
+            }
+        }
 
 
         private FileRowState _state;
@@ -121,7 +122,6 @@ namespace RadioOwl.Data
                 _state = value;
                 StateColor = new SolidColorBrush(SetStateColor());
                 OnPropertyChanged();
-                OnPropertyChanged("StateColor");
             }
         }
 
@@ -196,75 +196,16 @@ namespace RadioOwl.Data
             }
         }
 
-        private bool _saved;
-        public bool Saved
+        private string _savedFileName;
+        public string SavedFileName
         {
-            get { return _saved; }
+            get { return _savedFileName; }
             set
             {
-                _saved = value;
+                _savedFileName = value;
                 OnPropertyChanged();
             }
         }
-
-
-
-
-
-
-        private string _metaSiteName;
-        public string MetaSiteName
-        {
-            get { return _metaSiteName; }
-            set
-            {
-                _metaSiteName = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string _metaTitle;
-        public string MetaTitle
-        {
-            get { return _metaTitle; }
-            set
-            {
-                _metaTitle = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string _metaDescription;
-        public string MetaDescription
-        {
-            get { return _metaDescription; }
-            set
-            {
-                _metaDescription = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string _metaSubTitle;
-        public string MetaSubTitle
-        {
-            get { return _metaSubTitle; }
-            set
-            {
-                _metaSubTitle = value;
-                OnPropertyChanged();
-            }
-        }
-
-
-
-
-
-
-
-
-
-
 
 
         public FileRow(IList<FileRow> parentList, string urlPage)
@@ -275,10 +216,10 @@ namespace RadioOwl.Data
             UrlPage = urlPage;
         }
 
-        //public FileRow(IList<FileRow> parentList, StreamUrlRow streamUrlRow) : this(parentList, streamUrlRow?.Url)
-        //{
-        //    Id3NamePart = streamUrlRow?.Title;
-        //}
+        public FileRow(IList<FileRow> parentList, StreamUrlRow streamUrlRow) : this(parentList, streamUrlRow?.Url)
+        {
+            Id3NamePart = streamUrlRow?.Title;
+        }
 
 
         public void AddLog(string log)
@@ -306,9 +247,6 @@ namespace RadioOwl.Data
                     return Colors.LightGreen;
                 case FileRowState.Error:
                     return Colors.Red;
-                case FileRowState.AlreadyExists:
-                    return Colors.YellowGreen;
-                    //return Colors.SlateGray;
                 default:
                     return Colors.Blue;
             }

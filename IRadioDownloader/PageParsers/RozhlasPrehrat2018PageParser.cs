@@ -168,11 +168,20 @@ namespace RadioOwl.PageParsers
         {
             // TODO description ke vsemu stejne? nebo se podari vykousat jednotlive dily?
 
-            //parserResult.Title = GetMetaTagContent(htmlDoc, @"//meta[@property='og:title']");
-            //// <meta property="og:description" content="Poslechněte si oblíbené poetické texty básníka a publicisty Milana Šedivého." />
-            //parserResult.Description = GetMetaTagContent(htmlDoc, @"//meta[@property='og:description']");
-            //// <meta property="og:site_name" content="Vltava" />
-            //parserResult.SiteName = GetMetaTagContent(htmlDoc, @"//meta[@property='og:site_name']");
+            var title = GetMetaTagContent(htmlDoc, @"//meta[@property='og:title']");
+            // <meta property="og:description" content="Poslechněte si oblíbené poetické texty básníka a publicisty Milana Šedivého." />
+            var description = GetMetaTagContent(htmlDoc, @"//meta[@property='og:description']");
+            // <meta property="og:site_name" content="Vltava" />
+            var siteName = GetMetaTagContent(htmlDoc, @"//meta[@property='og:site_name']");
+
+            parserResult.RozhlasUrlSet.ForEach(
+                p => 
+                {
+                    p.Title = title;
+                    p.Description = description;
+                    p.SiteName = siteName;
+                }
+            );
         }
 
 

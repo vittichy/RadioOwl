@@ -78,21 +78,9 @@
                   cal:Message.Attach="[Event Drop] = [Action EventDrop($eventArgs)];
                                       [Event PreviewDragOver] = [Action EventPreviewDragOver($eventArgs)];" >
             <DataGrid.Columns>
-                <DataGridTextColumn Header="UrlPage" Binding="{Binding UrlPage, Mode=OneWay}" Width="160"/>
-                <DataGridTextColumn Header="UrlDownload" Binding="{Binding UrlDownload, Mode=OneWay}" Width="160"/>
-                <DataGridTextColumn Header="UrlDownloadNo" Binding="{Binding UrlDownloadNo, Mode=OneWay}" Width="160"/>
-                <DataGridTextColumn Header="Id" Binding="{Binding Id, Mode=OneWay}" Width="70"/>
-                <DataGridTextColumn Header="Pořad" Binding="{Binding Album}" Width="200"/>
-                <DataGridTextColumn Header="Titulek" Binding="{Binding Title}" Width="440"/>
-                <DataGridTemplateColumn Header="Log" Width="200">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <ComboBox ItemsSource="{Binding Path=LogList}"  SelectedIndex="{Binding Path=LogListIndex}" IsReadOnly="True" />
-                            </Grid>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Html link" Binding="{Binding UrlPage, Mode=OneWay}" Width="160"/>
+                <DataGridTextColumn Header="Mp3 link" Binding="{Binding UrlDownload, Mode=OneWay}" Width="160"/>
+                <DataGridTextColumn Header="Mp3 link no" Binding="{Binding UrlDownloadNo, Mode=OneWay}" Width="15"/>
 
                 <DataGridTemplateColumn Header="Průběh" Width="100">
                     <DataGridTemplateColumn.CellTemplate>
@@ -104,6 +92,22 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+
+                <!-- TODO delete? <DataGridTextColumn Header="Id" Binding="{Binding Id, Mode=OneWay}" Width="70"/>-->
+
+                <DataGridTextColumn Header="Name" Binding="{Binding Id3NameSite}" Width="100"/>
+                <DataGridTextColumn Header="Name" Binding="{Binding Id3Name}" Width="200"/>
+                <DataGridTextColumn Header="Name-Part" Binding="{Binding Id3NamePart}" Width="200"/>
+                <DataGridTemplateColumn Header="Log" Width="200">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <ComboBox ItemsSource="{Binding Path=LogList}"  SelectedIndex="{Binding Path=LogListIndex}" IsReadOnly="True" />
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
             </DataGrid.Columns>
 
             <DataGrid.ContextMenu>
