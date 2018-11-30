@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 namespace RadioOwlTests.PageParsers
 {
     [TestFixture]
-    public class RozhlasPrehrat2018PageParserTests : TestBase
+    public class RozhlasPrehrat2017PageParserTests : TestBase
     {
         [Test]
         public async Task CanParseTests()
         {
-            var parser = new RozhlasPrehrat2018PageParser();
+            var parser = new RozhlasPrehrat2017PageParser();
 
             var result = await parser.CanParse(null);
             Assert.IsNull(result);
@@ -25,10 +25,7 @@ namespace RadioOwlTests.PageParsers
             // ok urls
             var urls = new string[]
             {
-                @"http://plus.rozhlas.cz/host-galeristka-a-kuratorka-jirina-divacka-7671850?player=on#player",
-                @"http://region.rozhlas.cz/malebne-vlakove-nadrazi-v-hradku-u-susice-se-dostalo-mezi-deset-nejkrasnejsich-u-7671216?player=on#player",
-                @"http://radiozurnal.rozhlas.cz/pribeh-stoleti-7627378#dil=99?player=on#player",
-                @"http://dvojka.rozhlas.cz/miroslav-hornicek-petatricet-skvelych-pruvanu-a-jine-povidky-7670628#dil=2?player=on#player",
+                @"https://prehravac.rozhlas.cz/audio/4020655",
             };
             urls.ToList().ForEach(p => { Assert.IsNotNull(parser.CanParse(p).Result); });
 
@@ -51,15 +48,15 @@ namespace RadioOwlTests.PageParsers
         [Test]
         public void ParseHtmlTests1()
         {
-            var html = GetEmbeddedResource("Prehrat2018_01.html");
+            var html = GetEmbeddedResource("Prehrat2017-Radio_Junior_(archiv_-_Klub_Radia_Junior).html");
 
-            var parserResul = new RozhlasPrehrat2018PageParser().ParseHtml(html);
+            var parserResul = new RozhlasPrehrat2017PageParser().ParseHtml(html);
 
             Assert.IsNotNull(parserResul);
             Assert.IsNotNull(parserResul.LogSet);
             Assert.IsNotNull(parserResul.RozhlasUrlSet);
             Assert.AreEqual(0, parserResul.LogSet.Count);
-            Assert.AreEqual(2, parserResul.RozhlasUrlSet.Count);
+            Assert.AreEqual(1, parserResul.RozhlasUrlSet.Count);
         }
     }
 }

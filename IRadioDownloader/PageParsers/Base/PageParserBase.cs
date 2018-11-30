@@ -85,5 +85,26 @@ namespace RadioOwl.PageParsers.Base
 
             return await NextParser?.CanParse(url);
         }
+
+
+        protected string TrimProtocolFromUrl(string url)
+        {
+            if (!string.IsNullOrEmpty(url))
+            {
+                var protocols = new string[] 
+                {
+                    @"http://",
+                    @"https://"
+                };
+                foreach(var proto in protocols)
+                {
+                    if (url.StartsWith(proto))
+                    {
+                        url = url.Remove(0, proto.Length);
+                    }
+                }
+            }
+            return url;
+        }
     }
 }
