@@ -191,8 +191,8 @@ namespace RadioOwl.PageParsers
             var contentAttribute = xpathNodes?.FirstOrDefault()?.Attributes["content"]?.Value;
 
             // dencode char such &nbsp; as well (https://stackoverflow.com/questions/6665488/htmlagilitypack-and-htmldecode)
-            var deEntityzed = HtmlEntity.DeEntitize(contentAttribute);
-            return deEntityzed;
+            var deEntitized = HtmlEntity.DeEntitize(contentAttribute);
+            return deEntitized;
         }
     }
 }

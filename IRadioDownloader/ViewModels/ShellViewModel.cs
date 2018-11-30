@@ -17,14 +17,14 @@ namespace RadioOwl.ViewModels
 {
     /// <summary>
     /// TODO
-    /// - statusy logu
-    /// - grid rozmery
-    /// -url se nedoplnuje
     /// -rozumny format filenamu 
     /// - mozna doplnoval id3?
-    /// -filename stripovat blbe znaky
-    /// 
     /// - nektere odkazy jsou na WAV ne MP3: http://pardubice.rozhlas.cz/zaver-zivota-v-ustavu-ne-prectete-si-pribehy-tri-krehkych-bojovniku-7692592?player=on#player
+    /// 
+    /// 
+    /// 
+    /// 
+    /// 
     /// </summary>
     class ShellViewModel : Caliburn.Micro.PropertyChangedBase
     {
