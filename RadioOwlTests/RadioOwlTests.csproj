@@ -72,6 +72,9 @@
   <ItemGroup>
     <EmbeddedResource Include="TestData\Prehrat2017-Radio_Junior_%28archiv_-_Klub_Radia_Junior%29.html" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestData\Prehrat2018-Steinar_Bragi-Planina-Vltava.html" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

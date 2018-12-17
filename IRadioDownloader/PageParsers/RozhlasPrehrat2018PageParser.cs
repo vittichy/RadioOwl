@@ -83,10 +83,44 @@ namespace RadioOwl.PageParsers
                 htmlDoc.LoadHtml(parserResult.SourceHtml);
 
                 // get all  <script> under <head>
-                var xpathNodes = htmlDoc.DocumentNode.SelectNodes(@"//head//script");
-                if (xpathNodes != null && xpathNodes.Any())
+                var headScriptSet = htmlDoc.DocumentNode.SelectNodes(@"//head//script");
+                if (headScriptSet != null && headScriptSet.Any())
                 {
-                    var drupalSettingsJson = xpathNodes.FirstOrDefault(p => p.InnerText.Contains("jQuery.extend(Drupal.settings"))?.InnerText;
+                    // < div class="sm2-playlist-wrapper">
+
+
+                    var divSetXXX = htmlDoc.DocumentNode.SelectNodes(@"//div[@part and class='sm2-row sm2-wide']");
+
+
+                    var divPlaylistSet = htmlDoc.DocumentNode.SelectNodes(@"//div[@class='sm2-playlist-wrapper']");
+
+
+                    var mp3AnchorSet = htmlDoc.DocumentNode.SelectNodes(@"//div[@class='sm2-playlist-wrapper']//ul//li//div//a");
+
+                    Get(mp3AnchorSet, ref parserResult);
+
+
+//                    if (divPlaylistSet != null && divPlaylistSet.Any())
+//                    {
+//                        foreach(var divPlaylistRoot in divPlaylistSet)
+//                        {
+
+//                          // Get(divPlaylistRoot, ref parserResult);
+
+//                            //var divSet = divPlaylistRoot.SelectNodes(@".//div[@part and class='sm2 - row sm2 - wide']");
+
+
+//                            //var div1 = divPlaylistRoot.ChildNodes.FirstOrDefault(p => p.Attributes["part"] != null);
+                                
+////                                ...SelectNodes(@".//div[@part]");
+
+//                        }
+//                    }
+
+
+
+
+                    var drupalSettingsJson = headScriptSet.FirstOrDefault(p => p.InnerText.Contains("jQuery.extend(Drupal.settings"))?.InnerText;
                     if (!string.IsNullOrEmpty(drupalSettingsJson))
                     {
                         // select inner json data from <script> element
@@ -158,6 +192,131 @@ namespace RadioOwl.PageParsers
             }
 
             return parserResult;
+        }
+
+        private void Get(HtmlNodeCollection mp3AnchorSet, ref ParserResult parserResult)
+        {
+            /*
+                <div class="sm2-playlist-wrapper">
+                      <ul class="sm2-playlist-bd">
+                                                  <li>
+												  <div part="1" class="sm2-row sm2-wide" id="file-8490384">
+						===>  					    <a href="https://vltava.rozhlas.cz/sites/default/files/audios/8823b0fd947daa76167e9014d6ed4014.mp3?uuid=5c17536947ad0">
+												        <div class="filename" title="Steinar Bragi: Planina">
+												            <div class="filename__text" title="Steinar Bragi: Planina">1. díl: Steinar Bragi: Planina</div>
+												        </div>
+												    </a>
+												  <div class="audio-info-wrap">
+												  <span class="playlist-audio-time-to-expire">
+												  <span class="caption__desktop-only">k poslechu </span>ještě 3 dny</span>
+												  <span class="playlist-audio-length">28:14</span>
+												  </div>
+												  </div>
+												  </li>              
+             */
+
+            if (parserResult == null)
+                return;
+
+            if (mp3AnchorSet != null || mp3AnchorSet.Any())
+            {
+                foreach(var mp3A in mp3AnchorSet)
+                {
+                    var rozhlasUrl = new RozhlasUrl();
+                    rozhlasUrl.Url = mp3A.Attributes["href"]?.Value;
+
+                    var subDiv = mp3A.Descendants("div")?.FirstOrDefault()?.Descendants("div")?.FirstOrDefault();
+
+                    if(subDiv!= null)
+                    {
+                        var title = subDiv.Attributes["title"]?.Value ?? "TmpTitle";
+                        var text = subDiv.InnerText ?? "TmpText";
+
+
+
+// TODO mozna rovnou prevadet na filename? a nezkoumat to dal???
+
+
+
+                        rozhlasUrl.Description = "";
+                    }
+                    else
+                    {
+                        parserResult.AddLog($"ParsePrehrat2018Html - subDiv is null.");
+                    }
+
+
+
+                }
+
+                //var ulRootItem = divPlaylistRoot.ChildNodes.FirstOrDefault(p => p.Name == "ul" && p.Attributes["class"]?.Value == "sm2-playlist-bd");
+                //if (ulRootItem != null)
+                //{
+                //    var liSet = ulRootItem.ChildNodes.Where(p => p.Name == "li").ToList();
+                //    if (liSet != null && liSet.Any())
+                //    {
+                //        foreach (var li in liSet)
+                //        {
+
+                //            var mp3Url = li.Descendants("a").FirstOrDefault();
+
+                //        }
+
+                //    }
+                //    else
+                //    {
+                //        parserResult.AddLog($"ParsePrehrat2018Html - liSet is empty.");
+                //    }
+                //}
+                //else
+                //{
+                //    parserResult.AddLog($"ParsePrehrat2018Html - ulRootItem is null.");
+                //}
+            }
+            else
+            {
+                parserResult.AddLog($"ParsePrehrat2018Html - mp3AnchorSet is null.");
+            }
+
+
+
+
+
+
+
+
+
+
+            //if (divPlaylistRoot != null)
+            //{
+            //    var ulRootItem = divPlaylistRoot.ChildNodes.FirstOrDefault(p => p.Name == "ul" && p.Attributes["class"]?.Value == "sm2-playlist-bd");
+            //    if (ulRootItem != null)
+            //    {
+            //        var liSet = ulRootItem.ChildNodes.Where(p => p.Name == "li").ToList();
+            //        if (liSet != null && liSet.Any())
+            //        {
+            //            foreach (var li in liSet)
+            //            {
+
+            //                var mp3Url = li.Descendants("a").FirstOrDefault();
+
+            //            }
+
+            //        }
+            //        else
+            //        {
+            //            parserResult.AddLog($"ParsePrehrat2018Html - liSet is empty.");
+            //        }
+            //    }
+            //    else
+            //    {
+            //        parserResult.AddLog($"ParsePrehrat2018Html - ulRootItem is null.");
+            //    }
+            //}
+            //else
+            //{
+            //    parserResult.AddLog($"ParsePrehrat2018Html - divPlaylistRoot is null.");
+            //}
         }
 
 
