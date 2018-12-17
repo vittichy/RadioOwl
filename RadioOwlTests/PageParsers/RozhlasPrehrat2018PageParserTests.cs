@@ -61,5 +61,23 @@ namespace RadioOwlTests.PageParsers
             Assert.AreEqual(0, parserResul.LogSet.Count);
             Assert.AreEqual(2, parserResul.RozhlasUrlSet.Count);
         }
+
+
+
+        [Test]
+        public void ParseHtmlTests2()
+        {
+            var html = GetEmbeddedResource("Prehrat2018-Steinar_Bragi-Planina-Vltava.html");
+
+            var parserResul = new RozhlasPrehrat2018PageParser().ParseHtml(html);
+
+            Assert.IsNotNull(parserResul);
+            Assert.IsNotNull(parserResul.LogSet);
+            Assert.IsNotNull(parserResul.RozhlasUrlSet);
+            Assert.AreEqual(0, parserResul.LogSet.Count);
+            Assert.AreEqual(2, parserResul.RozhlasUrlSet.Count);
+        }
+
+        
     }
 }
