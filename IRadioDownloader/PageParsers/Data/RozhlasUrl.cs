@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
 namespace RadioOwl.PageParsers.Data
 {
+    [DebuggerDisplay("Url:{Url} | Title:{Title}")]
     public class RozhlasUrl
     {
         public string Url;
-        public string Description;
+        //public string Description;
         public string Title;
-        public string SiteName;
+//        public string SiteName;
     }
 }

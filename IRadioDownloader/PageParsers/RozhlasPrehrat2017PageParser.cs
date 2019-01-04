@@ -38,12 +38,12 @@ namespace RadioOwl.PageParsers
 
         public override ParserResult ParseHtml(string html)
         {
-            var parserResult = new ParserResult(html);
+            var parserResult = new ParserResult();
             try
             {
                 // html nemusi byt validni xml, takze je potreba pro parsovani pouzit Html Agility Pack
                 var htmlDoc = new HtmlDocument();
-                htmlDoc.LoadHtml(parserResult.SourceHtml);
+                htmlDoc.LoadHtml(html);
 
                 // get all  <script> under <head>
                 var xpathNodes = htmlDoc.DocumentNode.SelectNodes(@"//head//script");
@@ -65,9 +65,9 @@ namespace RadioOwl.PageParsers
                             var fullMp3Url = GetIRadioMp3Url(trackId);
                             parserResult.AddUrl(fullMp3Url, "");
 
-                            parserResult.RozhlasUrlSet[0].SiteName = GetJsonAttributeValue(jObject, "station");
+//                            parserResult.RozhlasUrlSet[0].SiteName = GetJsonAttributeValue(jObject, "station");
                             parserResult.RozhlasUrlSet[0].Title = GetMetaTagContent(htmlDoc, @"//meta[@name='og:title']");
-                            parserResult.RozhlasUrlSet[0].Description = GetMetaTagContent(htmlDoc, @"//meta[@name='description']");
+//                            parserResult.RozhlasUrlSet[0].Description = GetMetaTagContent(htmlDoc, @"//meta[@name='description']");
                         }
                         else
                         {

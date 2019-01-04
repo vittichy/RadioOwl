@@ -324,9 +324,9 @@ namespace RadioOwl.ViewModels
             fileRow.UrlMp3Download = rozhlasUrl.Url;
             fileRow.UrlMp3DownloadNo = partNo;
 
-            fileRow.Id3NameSite = rozhlasUrl.SiteName;
+//            fileRow.Id3NameSite = rozhlasUrl.SiteName;
             fileRow.Id3Name = rozhlasUrl.Title;
-            fileRow.Id3NamePart = rozhlasUrl.Description;
+//            fileRow.Id3NamePart = rozhlasUrl.Description;
 
             fileRow.AddLog(logMessage);
 

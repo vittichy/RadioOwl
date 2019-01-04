@@ -8,17 +8,36 @@ namespace RadioOwl.PageParsers.Data
 {
     public class ParserResult
     {
-        public readonly string SourceHtml;
+        /// <summary>
+        /// full downloaded html source
+        /// </summary>
+ //       public readonly string SourceHtml;
 
-        public List<RozhlasUrl> RozhlasUrlSet = new List<RozhlasUrl>();
+        /// <summary>
+        /// set of log messages (ussualy errors?)
+        /// </summary>
+        public readonly List<string> LogSet = new List<string>();
 
-        public List<string> LogSet = new List<string>();
+        /// <summary>
+        /// 
+        /// </summary>
+        public readonly List<RozhlasUrl> RozhlasUrlSet = new List<RozhlasUrl>();
 
 
-        public ParserResult(string sourceHtml)
-        {
-            SourceHtml = sourceHtml;
-        }
+
+        public string Title { get; set; } = "PARSER_DEFAULT_TITLE";
+
+        public string MetaTitle { get; set; }
+        public string MetaDescription { get; set; }
+
+
+        ///// <summary>
+        ///// constructor
+        ///// </summary>
+        //public ParserResult(string sourceHtml)
+        //{
+        //    SourceHtml = sourceHtml;
+        //}
 
 
         public ParserResult AddLog(string logMsg)
@@ -27,9 +46,10 @@ namespace RadioOwl.PageParsers.Data
             return this;
         }
 
-        public ParserResult AddUrl(string url, string description)
+
+        public ParserResult AddUrl(string url, string title)
         {
-            RozhlasUrlSet.Add(new RozhlasUrl() { Url = url, Description = description });
+            RozhlasUrlSet.Add(new RozhlasUrl() { Url = url, Title = title });
             return this;
         }
     }

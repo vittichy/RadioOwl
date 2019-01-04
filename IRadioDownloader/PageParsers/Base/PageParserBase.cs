@@ -72,7 +72,7 @@ namespace RadioOwl.PageParsers.Base
             var html = await DownloadHtml(url);
 
             if (string.IsNullOrEmpty(html))
-                return new ParserResult(null).AddLog($"Nepodařilo se stažení hlavní stránky: '{url}'"); // no source html - no fun
+                return new ParserResult().AddLog($"Nepodařilo se stažení hlavní stránky: '{url}'"); // no source html - no fun
             //Parse(parserResult);
             else
                 return ParseHtml(html); // try to parse
