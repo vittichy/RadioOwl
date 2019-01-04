@@ -49,7 +49,7 @@ namespace RadioOwlTests.PageParsers
 
 
         [Test]
-        public void ParseHtmlTests1()
+        public void ParseHtmlTests2018()
         {
             var html = GetEmbeddedResource("Prehrat2018_01.html");
 
@@ -65,8 +65,9 @@ namespace RadioOwlTests.PageParsers
 
 
         [Test]
-        public void ParseHtmlTests2()
+        public void ParseHtmlTests2019()
         {
+            // serial vice dilu na jedne strance
             var html = GetEmbeddedResource("Prehrat2018-Steinar_Bragi-Planina-Vltava.html");
 
             var parserResul = new RozhlasPrehrat2018PageParser().ParseHtml(html);
@@ -75,9 +76,40 @@ namespace RadioOwlTests.PageParsers
             Assert.IsNotNull(parserResul.LogSet);
             Assert.IsNotNull(parserResul.RozhlasUrlSet);
             Assert.AreEqual(0, parserResul.LogSet.Count);
-            Assert.AreEqual(2, parserResul.RozhlasUrlSet.Count);
+            Assert.AreEqual(5, parserResul.RozhlasUrlSet.Count);
+            Assert.IsTrue(parserResul.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Url)));
+            Assert.IsTrue(parserResul.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Title)));
+
+
+            html = GetEmbeddedResource("Prehrat2019-PJORourke Jak se dnes chovat ve spolecnosti.html");
+
+            parserResul = new RozhlasPrehrat2018PageParser().ParseHtml(html);
+
+            Assert.IsNotNull(parserResul);
+            Assert.IsNotNull(parserResul.LogSet);
+            Assert.IsNotNull(parserResul.RozhlasUrlSet);
+            Assert.AreEqual(0, parserResul.LogSet.Count);
+            Assert.AreEqual(4, parserResul.RozhlasUrlSet.Count);
+            Assert.IsTrue(parserResul.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Url)));
+            Assert.IsTrue(parserResul.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Title)));
+            
+            html = GetEmbeddedResource("Prehrat2019-Nosorozec severni bily.html");
+
+            parserResul = new RozhlasPrehrat2018PageParser().ParseHtml(html);
+
+            Assert.IsNotNull(parserResul);
+            Assert.IsNotNull(parserResul.LogSet);
+            Assert.IsNotNull(parserResul.RozhlasUrlSet);
+            Assert.AreEqual(0, parserResul.LogSet.Count);
+            Assert.AreEqual(1, parserResul.RozhlasUrlSet.Count);
+            Assert.IsTrue(parserResul.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Url)));
+            Assert.IsTrue(parserResul.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Title)));
+            Assert.IsFalse(parserResul.RozhlasUrlSet.Any(p => p.Title?.Contains("DEFAULT_TITLE") ?? false));
+
+            
+
         }
 
-        
+
     }
 }

@@ -75,13 +75,35 @@ namespace RadioOwl.PageParsers
 
         public override ParserResult ParseHtml(string html)
         {
-            var parserResult = new ParserResult(html);
+            var parserResult = new ParserResult();
             try
             {
                 // html nemusi byt validni xml, takze je potreba pro parsovani pouzit Html Agility Pack
                 var htmlDoc = new HtmlDocument();
-                htmlDoc.LoadHtml(parserResult.SourceHtml);
+                htmlDoc.LoadHtml(html);
+                
+                // hlavni title cele stranky - tj je-li vice dilu, tak spolecny nazev - nasledne bych ho mel pouzit pro folder kam budu ukladat
+                // mozna by slo pouzit i <h1>, ale zatim beru tohle:
+                // <meta property="og:title" content="Steinar Bragi: Planina" />
+                var metaTitle= htmlDoc.DocumentNode.SelectSingleNode(@"//meta[@property='og:title']");
+                if(metaTitle != null)
+                {
+                    parserResult.MetaTitle = metaTitle.Attributes.FirstOrDefault(p => p.Name == "content")?.Value?.Trim();
+                }
+                if (string.IsNullOrEmpty(parserResult.MetaTitle))
+                {
+                    parserResult.MetaTitle = "DESCRIPTION_NOT_FOUND";
+                }
 
+                // hlavni description cele stranky - asi nebude potreba? 
+                // <meta property="og:description" content="Sugestivní a výborně napsaný příběh o vině a nevinnosti, hranicích lidskosti a střetnutí s chladnou krutostí islandské přírody i vlastním nitrem – dílo, které v sobě spojuje prvky psychologického thrilleru a islandské lidové pověsti. Četbu na pokračování z románu současného islandského spisovatele poslouchejte on-line po dobu jednoho týdne po odvysílání." />
+                parserResult.MetaDescription = htmlDoc.DocumentNode.SelectSingleNode(@"//meta[@property='og:description']")
+                                                        ?.Attributes
+                                                            ?.FirstOrDefault(p => p.Name == "content")
+                                                                ?.Value
+                                                                    ?.Trim();
+
+                // jednotlive podary (dily serialu) jsou pod  <div class="sm2-playlist-wrapper">  < ul class="sm2-playlist-bd">
                 // get all  <script> under <head>
                 var headScriptSet = htmlDoc.DocumentNode.SelectNodes(@"//head//script");
                 if (headScriptSet != null && headScriptSet.Any())
@@ -89,36 +111,40 @@ namespace RadioOwl.PageParsers
                     // < div class="sm2-playlist-wrapper">
 
 
-                    var divSetXXX = htmlDoc.DocumentNode.SelectNodes(@"//div[@part and class='sm2-row sm2-wide']");
+                    //var divSetXXX = htmlDoc.DocumentNode.SelectNodes(@"//div[@part and class='sm2-row sm2-wide']");
 
 
-                    var divPlaylistSet = htmlDoc.DocumentNode.SelectNodes(@"//div[@class='sm2-playlist-wrapper']");
+                    //var divPlaylistSet = htmlDoc.DocumentNode.SelectNodes(@"//div[@class='sm2-playlist-wrapper']");
 
 
                     var mp3AnchorSet = htmlDoc.DocumentNode.SelectNodes(@"//div[@class='sm2-playlist-wrapper']//ul//li//div//a");
 
-                    Get(mp3AnchorSet, ref parserResult);
+                    GetUrlsFromPlayListWrapper(mp3AnchorSet, ref parserResult);
+
+                    if (parserResult.RozhlasUrlSet.Any())
+                        return parserResult;
+
+                    //                    if (divPlaylistSet != null && divPlaylistSet.Any())
+                    //                    {
+                    //                        foreach(var divPlaylistRoot in divPlaylistSet)
+                    //                        {
+
+                    //                          // Get(divPlaylistRoot, ref parserResult);
+
+                    //                            //var divSet = divPlaylistRoot.SelectNodes(@".//div[@part and class='sm2 - row sm2 - wide']");
 
 
-//                    if (divPlaylistSet != null && divPlaylistSet.Any())
-//                    {
-//                        foreach(var divPlaylistRoot in divPlaylistSet)
-//                        {
+                    //                            //var div1 = divPlaylistRoot.ChildNodes.FirstOrDefault(p => p.Attributes["part"] != null);
 
-//                          // Get(divPlaylistRoot, ref parserResult);
+                    ////                                ...SelectNodes(@".//div[@part]");
 
-//                            //var divSet = divPlaylistRoot.SelectNodes(@".//div[@part and class='sm2 - row sm2 - wide']");
-
-
-//                            //var div1 = divPlaylistRoot.ChildNodes.FirstOrDefault(p => p.Attributes["part"] != null);
-                                
-////                                ...SelectNodes(@".//div[@part]");
-
-//                        }
-//                    }
+                    //                        }
+                    //                    }
 
 
 
+
+                    // jiny zpusob ziskani z Drupal.settings
 
                     var drupalSettingsJson = headScriptSet.FirstOrDefault(p => p.InnerText.Contains("jQuery.extend(Drupal.settings"))?.InnerText;
                     if (!string.IsNullOrEmpty(drupalSettingsJson))
@@ -194,7 +220,7 @@ namespace RadioOwl.PageParsers
             return parserResult;
         }
 
-        private void Get(HtmlNodeCollection mp3AnchorSet, ref ParserResult parserResult)
+        private void GetUrlsFromPlayListWrapper(HtmlNodeCollection mp3AnchorSet, ref ParserResult parserResult)
         {
             /*
                 <div class="sm2-playlist-wrapper">
@@ -222,28 +248,57 @@ namespace RadioOwl.PageParsers
             {
                 foreach(var mp3A in mp3AnchorSet)
                 {
-                    var rozhlasUrl = new RozhlasUrl();
-                    rozhlasUrl.Url = mp3A.Attributes["href"]?.Value;
+                    // each single anchor:
+                    // <a href = "https://vltava.rozhlas.cz/sites/default/files/audios/8823b0fd947daa76167e9014d6ed4014.mp3?uuid=5c17536947ad0" >
+                    //      <div class="filename" title="Steinar Bragi: Planina">
+					//          <div class="filename__text" title="Steinar Bragi: Planina">1. díl: Steinar Bragi: Planina</div>
+					//      </div>
+					// </a>
 
-                    var subDiv = mp3A.Descendants("div")?.FirstOrDefault()?.Descendants("div")?.FirstOrDefault();
+                    
+                    var url = mp3A.Attributes["href"]?.Value;
 
-                    if(subDiv!= null)
-                    {
-                        var title = subDiv.Attributes["title"]?.Value ?? "TmpTitle";
-                        var text = subDiv.InnerText ?? "TmpText";
-
-
-
-// TODO mozna rovnou prevadet na filename? a nezkoumat to dal???
+                    var filenameTextNode = mp3A.ChildNodes.SelectMany(p => p.ChildNodes).FirstOrDefault(p => p.Attributes.Any(a => a.Name == "class" && a.Value == "filename__text"));
 
 
+                  //  var filenameTextNode = GetNodeWithAttributeValue(mp3A.ChildNodes, "class", "filename__text");
+                    var title = filenameTextNode?.InnerHtml?.Trim() ?? $"DEFAULT_TITLE_{Guid.NewGuid()}";
 
-                        rozhlasUrl.Description = "";
-                    }
-                    else
-                    {
-                        parserResult.AddLog($"ParsePrehrat2018Html - subDiv is null.");
-                    }
+                    parserResult.AddUrl(url, title);
+
+                        //                    var subDivC = mp3A.ChildNodes.SelectMany(p => p.Attributes).FirstOrDefault(p => p.Name == "class")?.Name;
+
+                        //var subDivC = mp3A.ChildNodes.Where(p => p.Attributes.Contains(a => a.Name == "class" && a.va
+                        ////    ).FirstOrDefault(p => p.Name == "class")?.Name;async= 
+
+
+
+                        //var subDiv = mp3A.Descendants("div")?.FirstOrDefault()?.Descendants("div")?.FirstOrDefault();
+
+
+                        // zjistit sub div s urcitym attributem?
+
+                        // mp3A.ChildNodes.Where(p => p.Attributes.Contains("a"));
+
+
+
+//                        if (subDiv!= null)
+//                    {
+//                        var title = subDiv.Attributes["title"]?.Value ?? "TmpTitle";
+//                        var text = subDiv.InnerText ?? "TmpText";
+
+
+
+//// TODO mozna rovnou prevadet na filename? a nezkoumat to dal???
+
+
+
+// //                       rozhlasUrl.Description = "";
+//                    }
+//                    else
+//                    {
+//                        parserResult.AddLog($"ParsePrehrat2018Html - subDiv is null.");
+//                    }
 
 
 
@@ -337,8 +392,8 @@ namespace RadioOwl.PageParsers
                 p => 
                 {
                     p.Title = title;
-                    p.Description = description;
-                    p.SiteName = siteName;
+//                    p.Description = description;
+//                    p.SiteName = siteName;
                 }
             );
         }
@@ -352,6 +407,27 @@ namespace RadioOwl.PageParsers
             // dencode char such &nbsp; as well (https://stackoverflow.com/questions/6665488/htmlagilitypack-and-htmldecode)
             var deEntitized = HtmlEntity.DeEntitize(contentAttribute);
             return deEntitized;
+        }
+
+
+        private HtmlNode GetNodeWithAttributeValue(HtmlNodeCollection htmlNodes, string attName, string attValue)
+        {
+            if (htmlNodes != null)
+                return null;
+
+            //foreach(var node in htmlNodes)
+            //{
+            //    if(node != null && node.Attributes.Any(p => p.Name == attName && p.Value == attValue))
+            //    {
+            //        return node;
+            //    }
+            //}
+
+            return htmlNodes.FirstOrDefault(p => p.Attributes.Any(a => a.Name == attName && a.Value == attValue));
+
+
+
+            //return null;
         }
     }
 }
