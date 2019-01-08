@@ -94,10 +94,11 @@
                 </DataGridTemplateColumn>
 
                 <!-- TODO delete? <DataGridTextColumn Header="Id" Binding="{Binding Id, Mode=OneWay}" Width="70"/>-->
-
-                <DataGridTextColumn Header="Stanice" Binding="{Binding Id3NameSite}" Width="100"/>
-                <DataGridTextColumn Header="Pořad" Binding="{Binding Id3Name}" Width="200"/>
-                <DataGridTextColumn Header="Název" Binding="{Binding Id3NamePart}" Width="200"/>
+                <DataGridTextColumn Header="Stanice" Binding="{Binding MetaSiteName}" Width="60"/>
+                <DataGridTextColumn Header="Název" Binding="{Binding MetaTitle}" Width="130"/>
+                <DataGridTextColumn Header="Díl" Binding="{Binding MetaSubTitle}" Width="130"/>
+                <DataGridTextColumn Header="Popis" Binding="{Binding MetaDescription}" Width="130"/>
+                <DataGridTextColumn Header="Soubor" Binding="{Binding FileName}" Width="150"/>
                 <DataGridTemplateColumn Header="Log" Width="200">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

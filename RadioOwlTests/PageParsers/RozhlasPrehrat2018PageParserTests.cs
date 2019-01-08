@@ -53,63 +53,125 @@ namespace RadioOwlTests.PageParsers
         {
             var html = GetEmbeddedResource("Prehrat2018_01.html");
 
-            var parserResul = new RozhlasPrehrat2018PageParser().ParseHtml(html);
+            var parserResult = new RozhlasPrehrat2018PageParser().ParseHtml(html);
 
-            Assert.IsNotNull(parserResul);
-            Assert.IsNotNull(parserResul.LogSet);
-            Assert.IsNotNull(parserResul.RozhlasUrlSet);
-            Assert.AreEqual(0, parserResul.LogSet.Count);
-            Assert.AreEqual(2, parserResul.RozhlasUrlSet.Count);
+            Assert.IsNotNull(parserResult);
+            Assert.IsNotNull(parserResult.LogSet);
+            Assert.IsNotNull(parserResult.RozhlasUrlSet);
+            Assert.AreEqual(0, parserResult.LogSet.Count);
+            Assert.AreEqual(2, parserResult.RozhlasUrlSet.Count);
         }
 
 
 
         [Test]
-        public void ParseHtmlTests2019()
+        public void ParseHtmlTests2019_1()
         {
             // serial vice dilu na jedne strance
             var html = GetEmbeddedResource("Prehrat2018-Steinar_Bragi-Planina-Vltava.html");
 
-            var parserResul = new RozhlasPrehrat2018PageParser().ParseHtml(html);
+            var parserResult = new RozhlasPrehrat2018PageParser().ParseHtml(html);
 
-            Assert.IsNotNull(parserResul);
-            Assert.IsNotNull(parserResul.LogSet);
-            Assert.IsNotNull(parserResul.RozhlasUrlSet);
-            Assert.AreEqual(0, parserResul.LogSet.Count);
-            Assert.AreEqual(5, parserResul.RozhlasUrlSet.Count);
-            Assert.IsTrue(parserResul.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Url)));
-            Assert.IsTrue(parserResul.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Title)));
-
+            Assert.IsNotNull(parserResult);
+            Assert.IsNotNull(parserResult.LogSet);
+            Assert.IsNotNull(parserResult.RozhlasUrlSet);
+            Assert.AreEqual(0, parserResult.LogSet.Count);
+            Assert.AreEqual(5, parserResult.RozhlasUrlSet.Count);
+            Assert.IsTrue(parserResult.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Url)));
+            Assert.IsTrue(parserResult.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Title)));
 
             html = GetEmbeddedResource("Prehrat2019-PJORourke Jak se dnes chovat ve spolecnosti.html");
 
-            parserResul = new RozhlasPrehrat2018PageParser().ParseHtml(html);
+            parserResult = new RozhlasPrehrat2018PageParser().ParseHtml(html);
 
-            Assert.IsNotNull(parserResul);
-            Assert.IsNotNull(parserResul.LogSet);
-            Assert.IsNotNull(parserResul.RozhlasUrlSet);
-            Assert.AreEqual(0, parserResul.LogSet.Count);
-            Assert.AreEqual(4, parserResul.RozhlasUrlSet.Count);
-            Assert.IsTrue(parserResul.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Url)));
-            Assert.IsTrue(parserResul.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Title)));
-            
-            html = GetEmbeddedResource("Prehrat2019-Nosorozec severni bily.html");
-
-            parserResul = new RozhlasPrehrat2018PageParser().ParseHtml(html);
-
-            Assert.IsNotNull(parserResul);
-            Assert.IsNotNull(parserResul.LogSet);
-            Assert.IsNotNull(parserResul.RozhlasUrlSet);
-            Assert.AreEqual(0, parserResul.LogSet.Count);
-            Assert.AreEqual(1, parserResul.RozhlasUrlSet.Count);
-            Assert.IsTrue(parserResul.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Url)));
-            Assert.IsTrue(parserResul.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Title)));
-            Assert.IsFalse(parserResul.RozhlasUrlSet.Any(p => p.Title?.Contains("DEFAULT_TITLE") ?? false));
-
-            
+            Assert.IsNotNull(parserResult);
+            Assert.IsNotNull(parserResult.LogSet);
+            Assert.IsNotNull(parserResult.RozhlasUrlSet);
+            Assert.AreEqual(0, parserResult.LogSet.Count);
+            Assert.AreEqual(4, parserResult.RozhlasUrlSet.Count);
+            Assert.IsTrue(parserResult.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Url)));
+            Assert.IsTrue(parserResult.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Title)));
 
         }
 
+
+        [Test]
+        public void ParseHtmlTests2019_2()
+        {
+            // porad bez vice dilu
+            var html = GetEmbeddedResource("Prehrat2019-Nosorozec severni bily.html");
+
+            var parserResult = new RozhlasPrehrat2018PageParser().ParseHtml(html);
+
+            Assert.IsNotNull(parserResult);
+            Assert.IsNotNull(parserResult.LogSet);
+            Assert.IsNotNull(parserResult.RozhlasUrlSet);
+            Assert.AreEqual(0, parserResult.LogSet.Count);
+            Assert.AreEqual(1, parserResult.RozhlasUrlSet.Count);
+            Assert.IsTrue(parserResult.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Url)));
+            Assert.IsTrue(parserResult.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Title)));
+        }
+
+
+        [Test]
+        public void ParseHtmlTests2019_3()
+        {
+            // porad bez vice dilu
+            var html = GetEmbeddedResource("Prehrat2019-A.html");
+
+            var parserResult = new RozhlasPrehrat2018PageParser().ParseHtml(html);
+
+            Assert.IsNotNull(parserResult);
+            Assert.IsNotNull(parserResult.LogSet);
+            Assert.IsNotNull(parserResult.RozhlasUrlSet);
+            Assert.AreEqual(0, parserResult.LogSet.Count);
+            Assert.AreEqual(1, parserResult.RozhlasUrlSet.Count);
+            Assert.IsTrue(parserResult.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Url)));
+            Assert.IsTrue(parserResult.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Title)));
+        }
+
+
+        [Test]
+        public void ParseHtmlTests2019_4_Radiozurnal()
+        {
+            // TODO - tohle zatim neumim - stranka obsahuje pouze odkazy na dalsi html ne na konkretni mp3 :-(
+            var html = GetEmbeddedResource("Prehrat2019-C-Radiozurnal.html");
+
+            var parserResult = new RozhlasPrehrat2018PageParser().ParseHtml(html);
+
+            Assert.IsNotNull(parserResult);
+            Assert.IsNotEmpty(parserResult.MetaDescription);
+            Assert.IsNotEmpty(parserResult.MetaSiteName);
+            Assert.IsNotEmpty(parserResult.MetaTitle);
+            //Assert.IsNotNull(parserResult.LogSet);
+            //Assert.IsNotNull(parserResult.RozhlasUrlSet);
+            //Assert.AreEqual(0, parserResult.LogSet.Count);
+            //Assert.AreEqual(1, parserResult.RozhlasUrlSet.Count);
+            //Assert.IsTrue(parserResult.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Url)));
+            //Assert.IsTrue(parserResult.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Title)));
+        }
+
+
+        [Test]
+        public void ParseHtmlTests2019_5()
+        {
+            // porad bez vice dilu
+            var html = GetEmbeddedResource("Prehrat2019-SoudceZMilosti.html");
+
+            var parserResult = new RozhlasPrehrat2018PageParser().ParseHtml(html);
+
+            Assert.IsNotNull(parserResult);
+            Assert.IsNotNull(parserResult.LogSet);
+            Assert.IsNotNull(parserResult.RozhlasUrlSet);
+            Assert.AreEqual(0, parserResult.LogSet.Count);
+            Assert.AreEqual(7, parserResult.RozhlasUrlSet.Count);
+            Assert.IsTrue(parserResult.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Url)));
+            Assert.IsTrue(parserResult.RozhlasUrlSet.All(p => !string.IsNullOrEmpty(p.Title)));
+
+            // vsechny title a url by meli byt rozdilne
+            Assert.AreEqual(parserResult.RozhlasUrlSet.Count(), parserResult.RozhlasUrlSet.Select(p => p.Title).Distinct().Count());
+            Assert.AreEqual(parserResult.RozhlasUrlSet.Count(), parserResult.RozhlasUrlSet.Select(p => p.Url).Distinct().Count());
+        }
 
     }
 }

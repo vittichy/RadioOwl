@@ -1,13 +1,23 @@
-﻿using System;
+﻿using Dtc.Common.Extensions;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace RadioOwl.PageParsers.Data
 {
+    [DebuggerDisplay("{DebuggerDisplay}")]
+     // | RozhlasUrlSet:{RozhlasUrlSet?.Count() ?? -1} | LogSet:{LogSet?.Count() ?? -1 | ...")]
     public class ParserResult
     {
+        private string DebuggerDisplay
+        {
+            get { return $"MetaTitle:{MetaTitle.Left(20)} | MetaDescription:{MetaDescription.Left(20)} | RozhlasUrlSet:{RozhlasUrlSet?.Count}  | LogSet:{LogSet?.Count} "; }
+        }
+
+
         /// <summary>
         /// full downloaded html source
         /// </summary>
@@ -23,12 +33,16 @@ namespace RadioOwl.PageParsers.Data
         /// </summary>
         public readonly List<RozhlasUrl> RozhlasUrlSet = new List<RozhlasUrl>();
 
-
-
-        public string Title { get; set; } = "PARSER_DEFAULT_TITLE";
-
+                  
         public string MetaTitle { get; set; }
+
+
         public string MetaDescription { get; set; }
+
+        /// <summary>
+        /// site name (Vlatava, Radiozurnal etc)
+        /// </summary>
+        public string MetaSiteName { get; set; }
 
 
         ///// <summary>
