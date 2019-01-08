@@ -81,6 +81,18 @@
   <ItemGroup>
     <EmbeddedResource Include="TestData\Prehrat2019-Nosorozec severni bily.html" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestData\Prehrat2019-A.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestData\Prehrat2019-B-Junior.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestData\Prehrat2019-C-Radiozurnal.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestData\Prehrat2019-SoudceZMilosti.html" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

@@ -8,6 +8,7 @@
         None,
         Started,
         Finnished,
-        Error
+        Error,
+        AlreadyExists
     }
 }

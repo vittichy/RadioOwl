@@ -103,6 +103,20 @@ namespace RadioOwl.PageParsers
                                                                 ?.Value
                                                                     ?.Trim();
 
+                // <meta property="og:site_name" content="Radiožurnál" />
+                var siteNameItem = htmlDoc.DocumentNode.SelectSingleNode(@"//meta[@property='og:site_name']");
+                if(siteNameItem != null)
+                {
+                    parserResult.MetaSiteName = siteNameItem.Attributes.FirstOrDefault(p => p.Name == "content")?.Value?.Trim();
+                }
+                else
+                {
+                    parserResult.MetaSiteName = "UNKNOWN_SITE_NAME";
+                }
+
+
+
+
                 // jednotlive podary (dily serialu) jsou pod  <div class="sm2-playlist-wrapper">  < ul class="sm2-playlist-bd">
                 // get all  <script> under <head>
                 var headScriptSet = htmlDoc.DocumentNode.SelectNodes(@"//head//script");
@@ -254,124 +268,26 @@ namespace RadioOwl.PageParsers
 					//          <div class="filename__text" title="Steinar Bragi: Planina">1. díl: Steinar Bragi: Planina</div>
 					//      </div>
 					// </a>
-
                     
                     var url = mp3A.Attributes["href"]?.Value;
 
                     var filenameTextNode = mp3A.ChildNodes.SelectMany(p => p.ChildNodes).FirstOrDefault(p => p.Attributes.Any(a => a.Name == "class" && a.Value == "filename__text"));
 
-
-                  //  var filenameTextNode = GetNodeWithAttributeValue(mp3A.ChildNodes, "class", "filename__text");
-                    var title = filenameTextNode?.InnerHtml?.Trim() ?? $"DEFAULT_TITLE_{Guid.NewGuid()}";
+                    // verze - napr cetba, serial - vice dilu
+                    var title = filenameTextNode?.InnerHtml?.Trim();
+                    if (string.IsNullOrEmpty(title))
+                    {
+                        // verze - jen jeden dil nejakeho poradu
+                        title = mp3A?.InnerHtml;
+                    }
 
                     parserResult.AddUrl(url, title);
-
-                        //                    var subDivC = mp3A.ChildNodes.SelectMany(p => p.Attributes).FirstOrDefault(p => p.Name == "class")?.Name;
-
-                        //var subDivC = mp3A.ChildNodes.Where(p => p.Attributes.Contains(a => a.Name == "class" && a.va
-                        ////    ).FirstOrDefault(p => p.Name == "class")?.Name;async= 
-
-
-
-                        //var subDiv = mp3A.Descendants("div")?.FirstOrDefault()?.Descendants("div")?.FirstOrDefault();
-
-
-                        // zjistit sub div s urcitym attributem?
-
-                        // mp3A.ChildNodes.Where(p => p.Attributes.Contains("a"));
-
-
-
-//                        if (subDiv!= null)
-//                    {
-//                        var title = subDiv.Attributes["title"]?.Value ?? "TmpTitle";
-//                        var text = subDiv.InnerText ?? "TmpText";
-
-
-
-//// TODO mozna rovnou prevadet na filename? a nezkoumat to dal???
-
-
-
-// //                       rozhlasUrl.Description = "";
-//                    }
-//                    else
-//                    {
-//                        parserResult.AddLog($"ParsePrehrat2018Html - subDiv is null.");
-//                    }
-
-
-
                 }
-
-                //var ulRootItem = divPlaylistRoot.ChildNodes.FirstOrDefault(p => p.Name == "ul" && p.Attributes["class"]?.Value == "sm2-playlist-bd");
-                //if (ulRootItem != null)
-                //{
-                //    var liSet = ulRootItem.ChildNodes.Where(p => p.Name == "li").ToList();
-                //    if (liSet != null && liSet.Any())
-                //    {
-                //        foreach (var li in liSet)
-                //        {
-
-                //            var mp3Url = li.Descendants("a").FirstOrDefault();
-
-                //        }
-
-                //    }
-                //    else
-                //    {
-                //        parserResult.AddLog($"ParsePrehrat2018Html - liSet is empty.");
-                //    }
-                //}
-                //else
-                //{
-                //    parserResult.AddLog($"ParsePrehrat2018Html - ulRootItem is null.");
-                //}
             }
             else
             {
                 parserResult.AddLog($"ParsePrehrat2018Html - mp3AnchorSet is null.");
             }
-
-
-
-
-
-
-
-
-
-
-            //if (divPlaylistRoot != null)
-            //{
-            //    var ulRootItem = divPlaylistRoot.ChildNodes.FirstOrDefault(p => p.Name == "ul" && p.Attributes["class"]?.Value == "sm2-playlist-bd");
-            //    if (ulRootItem != null)
-            //    {
-            //        var liSet = ulRootItem.ChildNodes.Where(p => p.Name == "li").ToList();
-            //        if (liSet != null && liSet.Any())
-            //        {
-            //            foreach (var li in liSet)
-            //            {
-
-            //                var mp3Url = li.Descendants("a").FirstOrDefault();
-
-            //            }
-
-            //        }
-            //        else
-            //        {
-            //            parserResult.AddLog($"ParsePrehrat2018Html - liSet is empty.");
-            //        }
-            //    }
-            //    else
-            //    {
-            //        parserResult.AddLog($"ParsePrehrat2018Html - ulRootItem is null.");
-            //    }
-            //}
-            //else
-            //{
-            //    parserResult.AddLog($"ParsePrehrat2018Html - divPlaylistRoot is null.");
-            //}
         }
 
 
