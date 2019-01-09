@@ -1,4 +1,5 @@
-﻿using RadioOwl.Data;
+﻿using Dtc.Common.Extensions;
+using RadioOwl.Data;
 using RadioOwl.PageParsers;
 using RadioOwl.PageParsers.Data;
 using RadioOwl.Radio;
@@ -52,7 +53,7 @@ namespace RadioOwl.ViewModels
             {
                 _selectedRow = value;
                 NotifyOfPropertyChange(() => SelectedRow);
-                NotifyOfPropertyChange(() => CanSniffAround);
+                // NotifyOfPropertyChange(() => CanSniffAround); // action not used
                 NotifyOfPropertyChange(() => CanPlayRow);
                 NotifyOfPropertyChange(() => CanDeleteRow);
             }
@@ -73,7 +74,7 @@ namespace RadioOwl.ViewModels
         /// <summary>
         /// can execute akce pro metodu SniffAround() - v caliburnu to lze resit nejen metodou, ale i pres takovouhle property, coz ma vyhodu v tom, ze ji lze odpalit v NotifyOfPropertyChange!
         /// </summary>
-        public bool CanSniffAround { get { return ((SelectedRow != null) && !string.IsNullOrEmpty(SelectedRow.Id)); } }
+        // public bool CanSniffAround { get { return ((SelectedRow != null) && !string.IsNullOrEmpty(SelectedRow.Id)); } }
 
         public bool CanPlayRow { get { return SelectedRowIsSaved; } }
 
@@ -305,7 +306,10 @@ namespace RadioOwl.ViewModels
             // ted uz mohu dopocitat filename pro ulozeni
             GetFileName(fileRow);
             if (File.Exists(fileRow.FileName))
+            {
+                fileRow.Progress = 100;
                 fileRow.AddLog(string.Format("Soubor již existuje: {0}.", fileRow.FileName), FileRowState.AlreadyExists);
+            }
             else
                 DownloadMp3Stream(fileRow);
         }
@@ -374,15 +378,13 @@ namespace RadioOwl.ViewModels
         }
 
 
+        /// <summary>
+        /// ensure suitable characters & max length of path (max is abou 248-250 chars)
+        /// </summary>
         private string GetFilenameSafeString(string filename)
         {
-            return string.Join("_", (filename?.Trim() ?? string.Empty).Split(Path.GetInvalidFileNameChars()));
+            return string.Join("_", (filename?.Trim() ?? string.Empty).Split(Path.GetInvalidFileNameChars())).Left(60);
         }
-
-        //private string GetStrOrDefault(string s, string defaultStr)
-        //{
-        //    return string.IsNullOrWhiteSpace(s) ? defaultStr : GetSafeFilename(s.Trim());
-        //}
 
 
         /// <summary>

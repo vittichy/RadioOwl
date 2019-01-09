@@ -1,5 +1,4 @@
-﻿using RadioOwl.PageParsers.Data;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Windows.Media;
 using vt.Extensions;
 
@@ -14,8 +13,6 @@ namespace RadioOwl.Data
         /// 
         /// </summary>
         private readonly IList<FileRow> ParentList;
-
-//        public bool IsMultiPart = false;
 
         private string _urlPage;
         /// <summary>
@@ -45,30 +42,7 @@ namespace RadioOwl.Data
             }
         }
 
-        //private int? _urlMp3DownloadNo = null;
-        //public int? UrlMp3DownloadNo
-        //{
-        //    get { return _urlMp3DownloadNo; }
-        //    set
-        //    {
-        //        _urlMp3DownloadNo = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
-
-        private string _id;
-        // TODO delete?
-        public string Id
-        {
-            get { return _id; }
-            set
-            {
-                _id = value;
-                OnPropertyChanged();
-            }
-        }
-
-
+       
         private string _fileName;
         public string FileName
         {
@@ -81,42 +55,6 @@ namespace RadioOwl.Data
         }
 
 
-        //private string _id3Name;
-        //public string Id3Name
-        //{
-        //    get { return _id3Name; }
-        //    set
-        //    {
-        //        _id3Name = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
-
-
-        //private string _id3NamePart;
-        //public string Id3NamePart
-        //{
-        //    get { return _id3NamePart; }
-        //    set
-        //    {
-        //        _id3NamePart = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
-
-
-        //private string _id3NameSite;
-        //public string Id3NameSite
-        //{
-        //    get { return _id3NameSite; }
-        //    set
-        //    {
-        //        _id3NameSite = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
-
-
         private FileRowState _state;
         public FileRowState State
         {
@@ -124,9 +62,9 @@ namespace RadioOwl.Data
             set
             {
                 _state = value;
-                StateColor = new SolidColorBrush(SetStateColor());
                 OnPropertyChanged();
-                OnPropertyChanged("StateColor");
+
+                StateColor = new SolidColorBrush(SetColorByState());
             }
         }
 
@@ -262,16 +200,6 @@ namespace RadioOwl.Data
         }
 
 
-
-
-
-
-
-
-
-
-
-
         public FileRow(IList<FileRow> parentList, string urlPage)
         {
             ParentList = parentList;
@@ -280,10 +208,6 @@ namespace RadioOwl.Data
             UrlPage = urlPage;
         }
 
-        //public FileRow(IList<FileRow> parentList, StreamUrlRow streamUrlRow) : this(parentList, streamUrlRow?.Url)
-        //{
-        //    Id3NamePart = streamUrlRow?.Title;
-        //}
 
 
         public void AddLog(string log)
@@ -299,9 +223,8 @@ namespace RadioOwl.Data
             State = fileRowState;
         }
 
-
         
-        private Color SetStateColor()
+        private Color SetColorByState()
         {
             switch (State)   
             {
@@ -312,8 +235,8 @@ namespace RadioOwl.Data
                 case FileRowState.Error:
                     return Colors.Red;
                 case FileRowState.AlreadyExists:
-                    return Colors.YellowGreen;
-                    //return Colors.SlateGray;
+                    return Colors.Yellow;
+
                 default:
                     return Colors.Blue;
             }
