@@ -14,7 +14,7 @@ namespace RadioOwl.ViewModels
 {
     /// <summary>
     /// TODO
-    /// -rozumny format filenamu 
+    /// - rozumny format filenamu 
     /// - mozna doplnoval id3?
     /// - nektere odkazy jsou na WAV ne MP3: http://pardubice.rozhlas.cz/zaver-zivota-v-ustavu-ne-prectete-si-pribehy-tri-krehkych-bojovniku-7692592?player=on#player
     /// 
@@ -25,13 +25,7 @@ namespace RadioOwl.ViewModels
     /// </summary>
     class ShellViewModel : Caliburn.Micro.PropertyChangedBase
     {
-        #region Consts
-        
         private const string DRAG_DROP_FORMAT = "UnicodeText";
-        private const int FILENAME_MAX_LEN = 150;
-
-        #endregion
-
 
         #region Properties
 
@@ -53,7 +47,6 @@ namespace RadioOwl.ViewModels
             {
                 _selectedRow = value;
                 NotifyOfPropertyChange(() => SelectedRow);
-                // NotifyOfPropertyChange(() => CanSniffAround); // action not used
                 NotifyOfPropertyChange(() => CanPlayRow);
                 NotifyOfPropertyChange(() => CanDeleteRow);
             }
@@ -70,11 +63,6 @@ namespace RadioOwl.ViewModels
 
 
         #region Properties-CanExecute
-
-        /// <summary>
-        /// can execute akce pro metodu SniffAround() - v caliburnu to lze resit nejen metodou, ale i pres takovouhle property, coz ma vyhodu v tom, ze ji lze odpalit v NotifyOfPropertyChange!
-        /// </summary>
-        // public bool CanSniffAround { get { return ((SelectedRow != null) && !string.IsNullOrEmpty(SelectedRow.Id)); } }
 
         public bool CanPlayRow { get { return SelectedRowIsSaved; } }
 
@@ -150,21 +138,6 @@ namespace RadioOwl.ViewModels
             ProcessUrl(url);
         }
 
-
-        ///// <summary>
-        ///// spusteni formulare s prohledanim okolnich ID (Očuchat okolní ID)
-        ///// </summary>
-        //public void SniffAround()
-        //{
-        //    // TODO zrusit?
-
-        //    //if (CanSniffAround)
-        //    //{
-        //    //    var urlStreams = SniffAroundViewModel.ExecuteModal(SelectedRow?.Id);
-        //    //    urlStreams?.ForEach(p => ProcessUrl(p));
-        //    //}
-        //}
-
         #endregion
 
 
@@ -191,16 +164,6 @@ namespace RadioOwl.ViewModels
 
 
         /// <summary>
-        /// zahaji zpracovani url - volani ze SniffView se seznamem vybranych ID
-        /// </summary>
-        private void ProcessUrl(StreamUrlRow streamUrlRow)
-        {
-            //var fileRow = new FileRow(Files, streamUrlRow);
-            //ProcessUrlRow(fileRow, fileRow.Url);
-        }
-
-
-        /// <summary>
         /// zahaji zpracovani url
         /// </summary>
         private void ProcessUrl(string url)
@@ -213,21 +176,7 @@ namespace RadioOwl.ViewModels
             fileRow.AddLog("Stahuji stránku pořadu.", FileRowState.Started);
 
             ProcessUrl(fileRow);
-
-            // ProcessUrlRow(fileRow);
         }
-
-
-        ///// <summary>
-        ///// zahaji zpracovani radku pro dotazenou url
-        ///// </summary>
-        //private void ProcessUrlRow(FileRow fileRow)
-        //{
-        //    Files.Insert(0, fileRow);
-        //    fileRow.AddLog("Stahuji stránku pořadu.", FileRowState.Started);
-
-        //    StartDownload(fileRow);
-        //}
 
 
         private async void ProcessUrl(FileRow fileRow)
@@ -404,72 +353,6 @@ namespace RadioOwl.ViewModels
 
             return fullFileName;
         }
-
-
-        ///// <summary>
-        ///// zkousi dohledat atribut od html elemetu dohledaneho pres xPath
-        ///// </summary>
-        ///// <param name="htmlDoc">html dokument</param>
-        ///// <param name="xPathNode">xPath pro dohledani elementu</param>
-        ///// <param name="attributeName">jmeno hledaneho atributu</param>
-        ///// <returns>hodnota hledaneho atributu</returns>
-        //private static string FindAttributeValue(HtmlDocument htmlDoc, string xPathNode, string attributeName)
-        //{
-        //    var xpathNodes = htmlDoc.DocumentNode.SelectNodes(xPathNode);
-        //    if (xpathNodes != null)
-        //    {
-        //        var node = xpathNodes.FirstOrDefault();
-        //        if (node != null)
-        //        {
-        //            var att = node.Attributes.FirstOrDefault(p => p.Name == attributeName);
-        //            if (att != null)
-        //            {
-        //                return att.Value;
-        //            }
-        //        }
-        //    }
-        //    return null;
-        //}
-        
-
-        ///// <summary>
-        ///// dohledani url k mp3 streamu na vltava like odkazu
-        ///// </summary>
-        //private static HtmlNode VltavaPageFindStreamUrl(HtmlDocument htmlDoc, string xPathNode)
-        //{
-        //    var xpathNodes = htmlDoc.DocumentNode.SelectNodes(xPathNode);
-        //    if (xpathNodes != null)
-        //    {
-        //        // html tagy dohledany pres xPath - staci mi ten prvni ;-) vic ji ted ani neni
-        //        var htmlNode = xpathNodes.FirstOrDefault();
-        //        if (htmlNode != null)
-        //        {
-        //            // mel by mit par urovni pod sebou <a> kde mne zajima jeho href
-        //            var childNodeOfType = htmlNode.GetSubNodesOfName("A").FirstOrDefault();
-        //            return childNodeOfType;
-        //        }
-        //    }
-        //    return null;
-        //}
-
-
-        ///// <summary>
-        ///// dohledani title k mp3 streamu na vltava like odkazu - trochu tim supluju ID3 tagy, ktere ted v stazenem souboru neni
-        ///// </summary>
-        //private static string VltavaPageFindTitle(HtmlDocument htmlDoc, string xPathNode)
-        //{
-        //    var xpathNodes = htmlDoc.DocumentNode.SelectNodes(xPathNode);
-        //    if (xpathNodes != null)
-        //    {
-        //        var htmlNode = xpathNodes.FirstOrDefault();
-        //        if (htmlNode != null)
-        //        {
-        //            var contentValue = htmlNode.GetAttributeValueByName("content");
-        //            return contentValue;
-        //        }
-        //    }
-        //    return null;
-        //}
 
         #endregion
     }
