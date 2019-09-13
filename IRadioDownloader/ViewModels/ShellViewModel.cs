@@ -193,7 +193,7 @@ namespace RadioOwl.ViewModels
                 return;
 
             var fileRow = new FileRow(Files, url);
-            Files.Add(fileRow);
+            Files.Insert(0, fileRow);
             fileRow.AddLog("Stahuji stránku pořadu.", FileRowState.Started);
 
             ProcessUrl(fileRow);
@@ -265,7 +265,7 @@ namespace RadioOwl.ViewModels
                 for (int i = 1; i < decoderResult.RozhlasUrlSet.Count; i++)
                 {
                     var fileRow = new FileRow(Files, mainFileRow.UrlPage);
-                    Files.Add(fileRow);
+                    Files.Insert(0, fileRow);
 
                     DownloadMp3StreamStart(decoderResult, decoderResult.RozhlasUrlSet[i], fileRow);
                 }
