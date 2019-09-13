@@ -149,21 +149,6 @@ namespace RadioOwl.ViewModels
             ProcessUrl(url);
         }
 
-
-        ///// <summary>
-        ///// spusteni formulare s prohledanim okolnich ID (Očuchat okolní ID)
-        ///// </summary>
-        //public void SniffAround()
-        //{
-        //    // TODO zrusit?
-
-        //    //if (CanSniffAround)
-        //    //{
-        //    //    var urlStreams = SniffAroundViewModel.ExecuteModal(SelectedRow?.Id);
-        //    //    urlStreams?.ForEach(p => ProcessUrl(p));
-        //    //}
-        //}
-
         #endregion
 
 
@@ -342,6 +327,36 @@ namespace RadioOwl.ViewModels
             fileRow.AddLog(string.Format("Uložen soubor: {0}", fileRow.FileName), FileRowState.Finnished);
         }
 
+        private string RemoveInvalidChars(string fileName)
+        {
+            string invalidChars = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+            foreach (char ch in invalidChars)
+            {
+                fileName = fileName.Replace(ch.ToString(), "");
+            }
+            return fileName;
+        }
+
+        public static string TrimToMaxLen(string value, int maxLen, string endString = null)
+        {
+            if (!string.IsNullOrEmpty(value) && (value.Length > maxLen))
+            {
+                maxLen = string.IsNullOrEmpty(endString) ? maxLen : (maxLen - endString.Length);
+                if (maxLen <= 0)
+                {
+                    value = string.IsNullOrEmpty(endString) ? string.Empty : endString;
+                }
+                else
+                {
+                    value = value.Remove(maxLen);
+                    if (!string.IsNullOrEmpty(endString))
+                    {
+                        value += endString;
+                    }
+                }
+            }
+            return value;
+        }
 
         /// <summary>
         /// sestrojeni filename - jiz nemohu spolehat na ID3 tagy, nove rozhlas mp3 soubory je neobsahujou :-/
@@ -359,6 +374,9 @@ namespace RadioOwl.ViewModels
                 }
             }
 
+            // nebezpecne znaky z filename + max delka jmena souboru
+            fileName = TrimToMaxLen(RemoveInvalidChars(fileName), 60);
+
             // pouzit hromadny titul (pri vice-dilnem downloadu) jako folder?
             if (!string.Equals(fileRow.MetaTitle, fileRow.MetaSubTitle))
             {
@@ -368,6 +386,8 @@ namespace RadioOwl.ViewModels
             // pouzit jmeno stanice jako folder?
             if (!string.IsNullOrWhiteSpace(fileRow.MetaSiteName))
                 fileName = Path.Combine(GetFilenameSafeString(fileRow.MetaSiteName), fileName);
+
+
 
             // pridej root adresar
             fileRow.FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), fileName) + ".mp3";

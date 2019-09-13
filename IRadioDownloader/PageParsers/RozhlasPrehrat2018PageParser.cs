@@ -3,11 +3,8 @@ using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
 using RadioOwl.PageParsers.Base;
 using RadioOwl.PageParsers.Data;
-using RadioOwl.Radio;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
-using vt.Http;
 
 namespace RadioOwl.PageParsers
 {
@@ -26,51 +23,8 @@ namespace RadioOwl.PageParsers
         public override bool CanParseCondition(string url)
         {
             return !string.IsNullOrEmpty(url)
-                            && url.StartsWith(@"http://", StringComparison.InvariantCultureIgnoreCase)
-                            && url.Contains(@".rozhlas.cz/")
-                            && url.EndsWith(@"?player=on#player", StringComparison.InvariantCultureIgnoreCase);
+                            && url.Contains(@".rozhlas.cz/");
         }
-
-
-        //public async Task<ParserResult> Parse(string url)
-        //{
-        //    var html = await DownloadHtml(url);
-
-        //    if (string.IsNullOrEmpty(html))
-        //        return new ParserResult(null).AddLog($"Nepodařilo se stažení hlavní stránky: '{url}'"); // no source html - no fun
-        //    //Parse(parserResult);
-        //    else
-        //        return ParseHtml(html); // try to parse
-        //}
-
-
-        //        private async Task<string> DownloadHtml(string url)
-        //        {
-        //            var asyncDownloader = new AsyncDownloader();
-        //            var downloaderOutput = await asyncDownloader.GetString(url);
-        //            return downloaderOutput.DownloadOk ? downloaderOutput.Output : null;
-
-
-        //            {
-        //                //return new ParserResult(downloaderOutput.Output);
-        //            }
-        ////            return new ParserResult(null).AddLog($"Nepodařilo se stažení hlavní stránky: '{url}'");
-        //        }
-
-
-        //private async Task<ParserResult> TryDecodeUrl(string url)
-        //{
-        //    var asyncDownloader = new AsyncDownloader();
-        //    var downloader = await asyncDownloader.GetString(url);
-        //    if (downloader.DownloadOk)
-        //    {
-        //        return Parse(downloader.Output);
-        //    }
-        //    else
-        //    {
-        //        return new ParserResult().AddLog($"Nepodařilo se stažení: '{url}'");
-        //    }
-        //}
 
 
         public override ParserResult ParseHtml(string html)
@@ -278,7 +232,7 @@ namespace RadioOwl.PageParsers
                     if (string.IsNullOrEmpty(title))
                     {
                         // verze - jen jeden dil nejakeho poradu
-                        title = mp3A?.InnerHtml;
+                        title = mp3A?.InnerText;
                     }
 
                     parserResult.AddUrl(url, title);

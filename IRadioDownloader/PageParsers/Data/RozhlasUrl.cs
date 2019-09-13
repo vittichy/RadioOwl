@@ -7,7 +7,13 @@ namespace RadioOwl.PageParsers.Data
     {
         public string Url;
         //public string Description;
-        public string Title;
-//        public string SiteName;
+        private string title;
+
+        public string Title
+        {
+            get => title;
+            set => title = value;
+        }
+        //        public string SiteName;
     }
 }

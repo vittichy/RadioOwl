@@ -269,6 +269,9 @@
   <ItemGroup>
     <Resource Include="iconfinder_Owl_3812747.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="_read_me.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>

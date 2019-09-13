@@ -58,9 +58,9 @@ namespace RadioOwl.Radio
         public static bool IsUrlToPrehrat2018(string url)
         {
             return (!string.IsNullOrEmpty(url)
-                        && url.StartsWith(@"http://", StringComparison.InvariantCultureIgnoreCase)
-                        && url.Contains(@".rozhlas.cz/")
-                        && url.EndsWith(@"?player=on#player", StringComparison.InvariantCultureIgnoreCase));
+                        //&& url.StartsWith(@"http://", StringComparison.InvariantCultureIgnoreCase)
+                        && url.Contains(@".rozhlas.cz/"));
+                        //&& url.EndsWith(@"?player=on#player", StringComparison.InvariantCultureIgnoreCase)); ; ; ;
         }
 
 
@@ -71,7 +71,7 @@ namespace RadioOwl.Radio
         public static bool IsUrlToVltavaPlay(string url)
         {
             return (!string.IsNullOrEmpty(url)
-                        && url.StartsWith(@"http://", StringComparison.InvariantCultureIgnoreCase)
+                       // && url.StartsWith(@"http://", StringComparison.InvariantCultureIgnoreCase)
                         && url.Contains(@".rozhlas.cz/")
                         && url.EndsWith(@"#play", StringComparison.InvariantCultureIgnoreCase));
         }
