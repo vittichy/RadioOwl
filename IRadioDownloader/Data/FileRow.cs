@@ -261,6 +261,17 @@ namespace RadioOwl.Data
             }
         }
 
+        private string _readMeText;
+        public string ReadMeText
+        {
+            get { return _readMeText; }
+            set
+            {
+                _readMeText = value;
+                OnPropertyChanged();
+            }
+        }
+
 
 
 

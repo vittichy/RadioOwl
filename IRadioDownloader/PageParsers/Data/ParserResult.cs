@@ -44,6 +44,11 @@ namespace RadioOwl.PageParsers.Data
         /// </summary>
         public string MetaSiteName { get; set; }
 
+        /// <summary>
+        /// text for readme file
+        /// </summary>
+        public string ReadMeText { get; set; }
+
 
         ///// <summary>
         ///// constructor

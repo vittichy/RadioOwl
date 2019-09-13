@@ -257,7 +257,7 @@ namespace RadioOwl.ViewModels
             var isMultipart = (decoderResult.RozhlasUrlSet.Count > 1);
 
             // first or main download link
-            DownloadMp3StreamStart(decoderResult, decoderResult.RozhlasUrlSet[0], mainFileRow);
+            DownloadMp3StreamStart(decoderResult, decoderResult.RozhlasUrlSet[0], mainFileRow, true);
 
             // next download links... (more part on one html page)
             if (isMultipart)
@@ -273,12 +273,12 @@ namespace RadioOwl.ViewModels
         }
 
 
-        private void DownloadMp3StreamStart(ParserResult decoderResult, RozhlasUrl rozhlasUrl, FileRow fileRow /*bool isMultipart,*/  /*int? partNo, string logMessage*/)
+        private void DownloadMp3StreamStart(ParserResult decoderResult, RozhlasUrl rozhlasUrl, FileRow fileRow, bool saveReadMeFile = false)
         {
             if (fileRow == null || rozhlasUrl == null || decoderResult == null)
                 return;
 
-            // cela skupina poradu - pokdu jich je na strance odkazovano vice
+            // cela skupina poradu - pokud jich je na strance odkazovano vice
             fileRow.MetaSiteName = decoderResult.MetaSiteName;
             fileRow.MetaTitle = decoderResult.MetaTitle;
             fileRow.MetaDescription = decoderResult.MetaDescription;
@@ -286,6 +286,7 @@ namespace RadioOwl.ViewModels
             // pro jednotlivy porad
             fileRow.UrlMp3Download = rozhlasUrl.Url;
             fileRow.MetaSubTitle = rozhlasUrl.Title;
+            fileRow.ReadMeText = saveReadMeFile ? decoderResult.ReadMeText : null;
 
             // ted uz mohu dopocitat filename pro ulozeni
             GetFileName(fileRow);
@@ -317,7 +318,14 @@ namespace RadioOwl.ViewModels
 
         private void SaveMp3(FileRow fileRow, byte[] data)
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(fileRow.FileName));
+            var path = Path.GetDirectoryName(fileRow.FileName);
+            Directory.CreateDirectory(path);
+
+            if (!string.IsNullOrEmpty(fileRow.ReadMeText))
+            {
+                var readMeFileName = Path.Combine(path, "_readme.txt");
+                File.WriteAllText(readMeFileName, fileRow.ReadMeText);
+            }
 
             using (var file = new FileStream(fileRow.FileName, FileMode.Create, FileAccess.Write))
             {

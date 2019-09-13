@@ -68,8 +68,17 @@ namespace RadioOwl.PageParsers
                     parserResult.MetaSiteName = "UNKNOWN_SITE_NAME";
                 }
 
-
-
+                // readme o poradu
+                var divFieldBody = htmlDoc.DocumentNode.SelectSingleNode(@"//div[@class='field body']");
+                if(divFieldBody != null)
+                {
+                    var pTextSet = divFieldBody.ChildNodes
+                                    .Where(p => p.Name?.Trim().ToUpper() == "P")
+                                        .Select(p=> p.InnerText?.Trim())
+                                            .Where(p => !string.IsNullOrEmpty(p)) 
+                                                .ToList();
+                    parserResult.ReadMeText = string.Join(Environment.NewLine, pTextSet);
+                }
 
                 // jednotlive podary (dily serialu) jsou pod  <div class="sm2-playlist-wrapper">  < ul class="sm2-playlist-bd">
                 // get all  <script> under <head>
