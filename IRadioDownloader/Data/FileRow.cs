@@ -81,6 +81,18 @@ namespace RadioOwl.Data
         }
 
 
+        private string _readMeFileName;
+        public string ReadMeFileName
+        {
+            get { return _readMeFileName; }
+            set
+            {
+                _readMeFileName = value;
+                OnPropertyChanged();
+            }
+        }
+
+
         //private string _id3Name;
         //public string Id3Name
         //{

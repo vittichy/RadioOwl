@@ -257,7 +257,7 @@ namespace RadioOwl.ViewModels
             var isMultipart = (decoderResult.RozhlasUrlSet.Count > 1);
 
             // first or main download link
-            DownloadMp3StreamStart(decoderResult, decoderResult.RozhlasUrlSet[0], mainFileRow, true);
+            DownloadMp3StreamStart(decoderResult, decoderResult.RozhlasUrlSet[0], mainFileRow);
 
             // next download links... (more part on one html page)
             if (isMultipart)
@@ -273,7 +273,7 @@ namespace RadioOwl.ViewModels
         }
 
 
-        private void DownloadMp3StreamStart(ParserResult decoderResult, RozhlasUrl rozhlasUrl, FileRow fileRow, bool saveReadMeFile = false)
+        private void DownloadMp3StreamStart(ParserResult decoderResult, RozhlasUrl rozhlasUrl, FileRow fileRow)
         {
             if (fileRow == null || rozhlasUrl == null || decoderResult == null)
                 return;
@@ -286,10 +286,10 @@ namespace RadioOwl.ViewModels
             // pro jednotlivy porad
             fileRow.UrlMp3Download = rozhlasUrl.Url;
             fileRow.MetaSubTitle = rozhlasUrl.Title;
-            fileRow.ReadMeText = saveReadMeFile ? decoderResult.ReadMeText : null;
+            fileRow.ReadMeText = decoderResult.ReadMeText;
 
             // ted uz mohu dopocitat filename pro ulozeni
-            GetFileName(fileRow);
+            GetFileNames(fileRow);
             if (File.Exists(fileRow.FileName))
                 fileRow.AddLog(string.Format("Soubor již existuje: {0}.", fileRow.FileName), FileRowState.AlreadyExists);
             else
@@ -310,22 +310,16 @@ namespace RadioOwl.ViewModels
                                                            TotalProgress.UpdateProgress(Files);
                                                        });
             if (output.DownloadOk)
-                SaveMp3(fileRow, output.Output);
+                Save(fileRow, output.Output);
             else
                 fileRow.AddLog(string.Format("Chyba při stahování streamu: {0}.", output.Exception?.Message), FileRowState.Error);
         }
 
 
-        private void SaveMp3(FileRow fileRow, byte[] data)
+        private void Save(FileRow fileRow, byte[] data)
         {
             var path = Path.GetDirectoryName(fileRow.FileName);
             Directory.CreateDirectory(path);
-
-            if (!string.IsNullOrEmpty(fileRow.ReadMeText))
-            {
-                var readMeFileName = Path.Combine(path, "_readme.txt");
-                File.WriteAllText(readMeFileName, fileRow.ReadMeText);
-            }
 
             using (var file = new FileStream(fileRow.FileName, FileMode.Create, FileAccess.Write))
             {
@@ -333,6 +327,9 @@ namespace RadioOwl.ViewModels
             }
             fileRow.Saved = true;
             fileRow.AddLog(string.Format("Uložen soubor: {0}", fileRow.FileName), FileRowState.Finnished);
+
+            if (!string.IsNullOrEmpty(fileRow.ReadMeText) && !string.IsNullOrEmpty(fileRow.ReadMeFileName))
+                File.WriteAllText(fileRow.ReadMeFileName, fileRow.ReadMeText);
         }
 
         private string RemoveInvalidChars(string fileName)
@@ -369,7 +366,7 @@ namespace RadioOwl.ViewModels
         /// <summary>
         /// sestrojeni filename - jiz nemohu spolehat na ID3 tagy, nove rozhlas mp3 soubory je neobsahujou :-/
         /// </summary>
-        private void GetFileName(FileRow fileRow)
+        private void GetFileNames(FileRow fileRow)
         {
             // filename - nejdrive vezmu title samotneho dilu poradu, neni-li tak hromadny title, neni-li tak vygeneruju nejake tmp jmeno
             var fileName = GetFilenameSafeString(fileRow.MetaSubTitle);
@@ -395,10 +392,14 @@ namespace RadioOwl.ViewModels
             if (!string.IsNullOrWhiteSpace(fileRow.MetaSiteName))
                 fileName = Path.Combine(GetFilenameSafeString(fileRow.MetaSiteName), fileName);
 
-
-
             // pridej root adresar
             fileRow.FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), fileName) + ".mp3";
+
+            // 
+            var readMePath = Path.GetDirectoryName(fileRow.FileName);
+            var safeMeta = GetFilenameSafeString(fileRow.MetaTitle);
+            var readMeFileName = (!string.IsNullOrWhiteSpace(safeMeta) ? safeMeta : "read_me");
+            fileRow.ReadMeFileName = Path.Combine(readMePath, readMeFileName) + ".txt";
         }
 
 
