@@ -1,0 +1,52 @@
+﻿<Window x:Class="RadioOwl.Forms.Test.Window2View"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RadioOwl.Forms"
+        mc:Ignorable="d"
+        Title="GridSplitter ukazka" Height="450" Width="800">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Background="LightGray">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"  />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" FontSize="55" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" 
+                       Background="AntiqueWhite">Left side</TextBlock>
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" 
+                          Background="GreenYellow"/>
+            <TextBlock Grid.Column="2" FontSize="55" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" 
+                       Background="Beige">Right side</TextBlock>
+        </Grid>
+
+        <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch"  Height="5" Background="Yellow" />
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <DockPanel Grid.Column="0"  Background="LightBlue">
+                <StackPanel />
+                <DockPanel />
+            </DockPanel>
+            <GridSplitter Width="5" HorizontalAlignment="Right" VerticalAlignment="Stretch" ResizeBehavior="CurrentAndNext"
+                          Background="LimeGreen"/>
+            <DockPanel Grid.Column="1" Background="LightCoral">
+                <StackPanel />
+                <DockPanel />
+            </DockPanel>
+        </Grid>
+
+    </Grid>
+
+</Window>

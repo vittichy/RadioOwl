@@ -1,0 +1,379 @@
+﻿<Window x:Class="RadioOwl.Forms.MainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:cal="clr-namespace:Caliburn.Micro;assembly=Caliburn.Micro.Platform"
+        xmlns:local="clr-namespace:RadioOwl.Forms"
+        mc:Ignorable="d"
+        AllowDrop="False"
+        Title="{Binding ViewTitle}"
+        Height="650" Width="1200">
+
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <!-- horní toolbar --> 
+            <RowDefinition Height="Auto" />
+            <!-- horní master datagrid  -->
+            <RowDefinition Height="*" />
+            <!-- grid splitter -->
+            <RowDefinition Height="Auto" />
+            <!-- spodní datagrid s detaily -->
+            <RowDefinition Height="*" />
+            <!-- spodní status bar -->
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ToolBarTray Grid.Row="0">
+            <ToolBar Height="36" >
+                <Button cal:Message.Attach="OpenUrl" >
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/RadioOwl;component/icons/glyphicons-201-download.png" />
+                        <TextBlock VerticalAlignment="Center" Margin="3,0,10,0" >Načíst z URL</TextBlock>
+                    </StackPanel>
+                </Button>
+                <Button cal:Message.Attach="UpdateApp"  >
+                    <StackPanel Orientation="Horizontal">
+                        <!--<Image Source="/RadioOwl;component/icons/glyphicons-201-download.png" />-->
+                        <TextBlock VerticalAlignment="Center" Margin="3,0,10,0" >Update app</TextBlock>
+                    </StackPanel>
+                </Button>
+                <Button cal:Message.Attach="AppInfo"  >
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Margin="3,0,10,0" >Info</TextBlock>
+                    </StackPanel>
+                </Button>
+                <!--<Button Name="SniffAround" IsEnabled="False" >
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/RadioOwl;component/icons/glyphicons-10-magic.png" />
+                        <TextBlock VerticalAlignment="Center" Margin="3,0,10,0" >Očuchat okolní ID</TextBlock>
+                    </StackPanel>
+                </Button>-->
+                <!--<Button Name="OpenSettings" IsEnabled="False">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/RadioOwl;component/icons/glyphicons-281-settings.png" />
+                        <TextBlock VerticalAlignment="Center" Margin="3,0,10,0" >Nastavení</TextBlock>
+                    </StackPanel>
+                </Button>-->
+            </ToolBar>
+        </ToolBarTray>
+
+
+
+        <DockPanel Grid.Row="1" 
+                   VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
+
+            <DataGrid DockPanel.Dock="Left" 
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                 
+                  x:Name="DataGridMain" 
+                  AutoGenerateColumns="False"  Focusable="True" 
+                  CanUserAddRows="False"
+                  AllowDrop="True" 
+                  ItemsSource="{Binding RadioDataSet}"
+                  SelectedItem="{Binding RadioDataSelected}"  
+                  IsReadOnly="True"
+                  cal:Message.Attach="[Event Drop] = [Action EventDrop($eventArgs)];
+                                      [Event PreviewDragOver] = [Action EventPreviewDragOver($eventArgs)];
+                                      [Event GotFocus] = [Action DataGridMainGotFocus()];
+                                      [Event MouseDoubleClick] = [Action DataGridMainMouseDoubleClick()];"  >
+                <!-- GotFocus event se nezda, ze by fungoval? -->
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Url"        Binding="{Binding Url, Mode=OneWay}"                        Width="160"/>
+                    <!-- tohle je pocet dilu zjisteny parsovanim, ne pocet PartSet ... otazka co by se zde melo zobrazovat? -->
+                    <DataGridTextColumn Header="Parts"      Binding="{Binding ContentSerialAllParts, Mode=OneWay}"      Width="50" />
+                    <DataGridTextColumn Header="Size"       Binding="{Binding TotalBytesToReceiveAsText, Mode=OneWay}"  Width="75"/>
+                    <!--<DataGridTextColumn Header="Staženo"    Binding="{Binding BytesReceivedAsText, Mode=OneWay}"        Width="150"/>-->
+                    <DataGridTemplateColumn Header="Progres" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid >
+                                    <ProgressBar Minimum="0" Maximum="100" Value="{Binding ProgressPercentage,Mode=OneWay}" Foreground="{Binding StateColor, Mode=OneWay}"  />
+                                    <TextBlock Foreground="Black" Text="{Binding ProgressPercentageAsText,Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="Bundle" Binding="{Binding SiteEntityBundle, Mode=OneWay}" Width="70"/>
+                    <DataGridTextColumn Header="Label" Binding="{Binding SiteEntityLabel, Mode=OneWay}" Width="160"/>
+                    <DataGridTextColumn Header="Path" Binding="{Binding SiteDocumentPath, Mode=OneWay}" Width="160" />
+
+                    <DataGridTemplateColumn Header="Log" Width="300">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <ComboBox ItemsSource="{Binding Path=LogSet}"  
+                                              SelectedIndex="{Binding Path=LogSetSelectedIndex}" 
+                                              DisplayMemberPath="DisplayText"
+                                              IsReadOnly="True" />
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+
+
+
+
+
+                    <!--<DataGridTextColumn Header="Html" Binding="{Binding UrlPage, Mode=OneWay}" Width="160"/>
+                <DataGridTextColumn Header="Audio" Binding="{Binding UrlMp3Download, Mode=OneWay}" Width="160"/>
+                <DataGridTextColumn Header="#" Binding="{Binding UrlMp3DownloadNo, Mode=OneWay}" Width="15"/>-->
+
+
+                    <!-- TODO delete? <DataGridTextColumn Header="Id" Binding="{Binding Id, Mode=OneWay}" Width="70"/>-->
+                    
+                    
+                    <!--<DataGridTextColumn Header="Stanice" Binding="{Binding MetaSiteName}" Width="60"/>
+                    <DataGridTextColumn Header="Název" Binding="{Binding MetaTitle}" Width="130"/>
+                    <DataGridTextColumn Header="Díl" Binding="{Binding MetaSubTitle}" Width="130"/>
+                    <DataGridTextColumn Header="Popis" Binding="{Binding MetaDescription}" Width="130"/>-->
+                  
+
+                </DataGrid.Columns>
+
+                <DataGrid.ContextMenu>
+                    <ContextMenu >
+                        <MenuItem Name="MiSmazat" Header="Smazat" cal:Message.Attach="[Event Click] = [Action DeleteRow]"  />
+                        <Separator />
+                        <MenuItem Name="MiPrehrat" Header="Přehrát" cal:Message.Attach="PlayRow" />
+                        <MenuItem Name="Mi1" Header="Refresh" cal:Message.Attach="RefreshRow" />
+                        <MenuItem Name="M2" Header="Save log" cal:Message.Attach="PlayRow" />
+                        <MenuItem Name="M23" Header="Open location" cal:Message.Attach="PlayRow" />
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+
+            </DataGrid>
+
+            <!--<DataGrid DockPanel.Dock="Right" >
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="XXXX" Binding="{Binding Url, Mode=OneWay}" Width="160"/>
+                </DataGrid.Columns>
+            </DataGrid>-->
+
+        </DockPanel>
+
+
+
+        <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch" />
+
+
+
+        <DataGrid 
+            Grid.Row="3"
+            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+            x:Name="DataGridParts" 
+            AutoGenerateColumns="False" 
+            CanUserAddRows="False"
+            AllowDrop="True" 
+            ItemsSource="{Binding RadioDataSelected.PartSet}"
+            SelectedItem="{Binding PartSelected}"
+            IsReadOnly="True" >
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="#" Binding="{Binding PartNo, Mode=OneWay}" Width="30" />
+                <DataGridTextColumn Header="Url" Binding="{Binding UrlMp3, Mode=OneWay}" Width="160"/>
+                <DataGridTextColumn Header="Title" Binding="{Binding Title, Mode=OneWay}" Width="200"/>
+                <DataGridTextColumn Header="Description" Binding="{Binding DescriptionSingleLine, Mode=OneWay}" Width="250"/>
+
+                <DataGridTemplateColumn Header="Progres" Width="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid >
+                                <ProgressBar Minimum="0" Maximum="100" Value="{Binding ProgressPercentage,Mode=OneWay}" Foreground="{Binding StateColor, Mode=OneWay}"  />
+                                <TextBlock Foreground="Black" Text="{Binding ProgressPercentageAsText,Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Header="FileName" Binding="{Binding FileName, Mode=OneWay}" Width="350"/>
+
+                <!--<DataGridTemplateColumn Header="Log" Width="200">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <ComboBox ItemsSource="{Binding Path=LogSet}"  
+                                          SelectedIndex="{Binding Path=LogSetSelectedIndex}" 
+                                          DisplayMemberPath="DisplayText"
+                                          IsReadOnly="True" />
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>-->
+
+
+                <!--<DataGridTemplateColumn Header="Log" Width="200">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <ComboBox ItemsSource="{Binding Path=LogSet}"  
+                                      SelectedIndex="{Binding Path=LogSetSelectedIndex}" 
+                                      DisplayMemberPath="DisplayText"
+                                      IsReadOnly="True" />
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>-->
+
+                <!--<DataGridTextColumn Header="Audio" Binding="{Binding UrlMp3Download, Mode=OneWay}" Width="160"/>
+                <DataGridTextColumn Header="#" Binding="{Binding UrlMp3DownloadNo, Mode=OneWay}" Width="15"/>
+
+                <DataGridTemplateColumn Header="Průběh" Width="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid >
+                                <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress,Mode=OneWay}" Foreground="{Binding StateColor, Mode=OneWay}"  />
+                                <TextBlock Foreground="Black" Text="{Binding ProgressPercent,Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>-->
+
+                <!-- TODO delete? <DataGridTextColumn Header="Id" Binding="{Binding Id, Mode=OneWay}" Width="70"/>-->
+                <!--<DataGridTextColumn Header="Stanice" Binding="{Binding MetaSiteName}" Width="60"/>
+                <DataGridTextColumn Header="Název" Binding="{Binding MetaTitle}" Width="130"/>
+                <DataGridTextColumn Header="Díl" Binding="{Binding MetaSubTitle}" Width="130"/>
+                <DataGridTextColumn Header="Popis" Binding="{Binding MetaDescription}" Width="130"/>
+                <DataGridTextColumn Header="Soubor" Binding="{Binding FileName}" Width="150"/>
+                <DataGridTemplateColumn Header="Log" Width="200">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <ComboBox ItemsSource="{Binding Path=LogList}"  SelectedIndex="{Binding Path=LogListIndex}" IsReadOnly="True" />
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>-->
+
+            </DataGrid.Columns>
+
+
+            <DataGrid.ContextMenu>
+                <ContextMenu >
+                    <MenuItem Name="MiSmazat2" Header="Smazat" cal:Message.Attach="[Event Click] = [Action DeleteRow]"  />
+                    <Separator />
+                    <MenuItem Name="MiPrehrat2" Header="Přehrát" cal:Message.Attach="PlayRow" />
+                    <MenuItem Name="Mi12" Header="Refresh" cal:Message.Attach="RefreshRow" />
+                    <MenuItem Name="M22" Header="Save log" cal:Message.Attach="PlayRow" />
+                    <MenuItem Name="M232" Header="Open location" cal:Message.Attach="PlayRow" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+
+            <!--<DataGrid.ContextMenu>
+                <ContextMenu >
+                    <MenuItem Name="MiSmazat" Header="Smazat" cal:Message.Attach="[Event Click] = [Action DeleteRow]"  />
+                    <Separator />
+                    <MenuItem Name="MiPrehrat" Header="Přehrát" cal:Message.Attach="PlayRow" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>-->
+
+        </DataGrid>
+
+
+
+
+        <!--<DataGrid DockPanel.Dock="Top"  Grid.Row="4"
+                  x:Name="DataGridLog" 
+                  AutoGenerateColumns="False" 
+                  CanUserAddRows="False"
+                  AllowDrop="True" 
+                  ItemsSource="{Binding LogSet}"
+                   SelectedItem="{Binding LogSelected}"
+                  IsReadOnly="True"
+                 >
+        
+
+            <DataGrid.Columns>
+            <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=\{0:dd.MM.yyyy HH:mm:ss.fff\}, Mode=OneWay}"  Width="160"/>
+            <DataGridTextColumn Header="PartNo" Binding="{Binding PartNo, Mode=OneWay}" Width="30"/>
+            <DataGridTextColumn Header="Level" Binding="{Binding Level, Mode=OneWay}" Width="75"/>
+            <DataGridTextColumn Header="Text" Binding="{Binding Text, Mode=OneWay}" Width="500"/>
+
+
+            -->
+        <!--<DataGridTextColumn Header="Audio" Binding="{Binding UrlMp3Download, Mode=OneWay}" Width="160"/>
+                <DataGridTextColumn Header="#" Binding="{Binding UrlMp3DownloadNo, Mode=OneWay}" Width="15"/>
+
+                <DataGridTemplateColumn Header="Průběh" Width="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid >
+                                <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress,Mode=OneWay}" Foreground="{Binding StateColor, Mode=OneWay}"  />
+                                <TextBlock Foreground="Black" Text="{Binding ProgressPercent,Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>-->
+
+        <!-- TODO delete? <DataGridTextColumn Header="Id" Binding="{Binding Id, Mode=OneWay}" Width="70"/>-->
+        <!--<DataGridTextColumn Header="Stanice" Binding="{Binding MetaSiteName}" Width="60"/>
+                <DataGridTextColumn Header="Název" Binding="{Binding MetaTitle}" Width="130"/>
+                <DataGridTextColumn Header="Díl" Binding="{Binding MetaSubTitle}" Width="130"/>
+                <DataGridTextColumn Header="Popis" Binding="{Binding MetaDescription}" Width="130"/>
+                <DataGridTextColumn Header="Soubor" Binding="{Binding FileName}" Width="150"/>
+                <DataGridTemplateColumn Header="Log" Width="200">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <ComboBox ItemsSource="{Binding Path=LogList}"  SelectedIndex="{Binding Path=LogListIndex}" IsReadOnly="True" />
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>-->
+        <!--
+
+        </DataGrid.Columns>
+
+        -->
+        <!--<DataGrid.ContextMenu>
+                <ContextMenu >
+                    <MenuItem Name="MiSmazat" Header="Smazat" cal:Message.Attach="[Event Click] = [Action DeleteRow]"  />
+                    <Separator />
+                    <MenuItem Name="MiPrehrat" Header="Přehrát" cal:Message.Attach="PlayRow" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>-->
+        <!--
+
+    </DataGrid>-->
+
+
+
+        <StatusBar DockPanel.Dock="Bottom"  Grid.Row="5">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <!--<StatusBarItem>
+                <TextBlock Name="lblCursorPosition" />
+            </StatusBarItem>
+            <Separator Grid.Column="1" />-->
+            <!--<StatusBarItem Grid.Column="0">
+                <ComboBox ItemsSource="{Binding Path=LogList}"  SelectedIndex="{Binding Path=LogListIndex}" IsReadOnly="True" />
+            </StatusBarItem>
+            <Separator Grid.Column="1" />-->
+            <StatusBarItem Grid.Column="0">
+                <!--<TextBlock Text="{Binding Total.ProgressPercent,Mode=OneWay}" />-->
+            </StatusBarItem>
+            <Separator Grid.Column="1" />
+            <StatusBarItem Grid.Column="2" >
+                <Grid >
+                    <!--<ProgressBar Minimum="0" Maximum="100" Value="{Binding TotalProgress.Progress,Mode=OneWay}" Width="200" HorizontalAlignment="Stretch"  VerticalContentAlignment="Stretch"/>-->
+                    <TextBlock Text="{Binding TotalProgress.BytesReceived,Mode=OneWay}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                </Grid>
+            </StatusBarItem>
+        </StatusBar>
+
+        <!--</DockPanel>-->
+
+    </Grid>
+
+</Window>

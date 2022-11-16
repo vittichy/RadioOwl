@@ -57,7 +57,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\IRadioDownloader\RadioOwl.csproj">
+    <ProjectReference Include="..\RadioOwl\RadioOwl.csproj">
       <Project>{4CDBF6CD-EE19-4DF6-BA90-795B6FD5C34F}</Project>
       <Name>RadioOwl</Name>
     </ProjectReference>

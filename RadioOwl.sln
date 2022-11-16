@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2048
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioOwl", "IRadioDownloader\RadioOwl.csproj", "{4CDBF6CD-EE19-4DF6-BA90-795B6FD5C34F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioOwl", "RadioOwl\RadioOwl.csproj", "{4CDBF6CD-EE19-4DF6-BA90-795B6FD5C34F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioOwlTests", "RadioOwlTests\RadioOwlTests.csproj", "{719E87AA-136C-4F7A-AD43-FF2E493C87C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioOwl.Parsers", "RadioOwl.Parsers\RadioOwl.Parsers.csproj", "{771DBBAA-F20E-44B2-9219-109690E19992}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,14 @@ Global
 		{719E87AA-136C-4F7A-AD43-FF2E493C87C6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{719E87AA-136C-4F7A-AD43-FF2E493C87C6}.Release|x64.ActiveCfg = Release|Any CPU
 		{719E87AA-136C-4F7A-AD43-FF2E493C87C6}.Release|x64.Build.0 = Release|Any CPU
+		{771DBBAA-F20E-44B2-9219-109690E19992}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{771DBBAA-F20E-44B2-9219-109690E19992}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{771DBBAA-F20E-44B2-9219-109690E19992}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{771DBBAA-F20E-44B2-9219-109690E19992}.Debug|x64.Build.0 = Debug|Any CPU
+		{771DBBAA-F20E-44B2-9219-109690E19992}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{771DBBAA-F20E-44B2-9219-109690E19992}.Release|Any CPU.Build.0 = Release|Any CPU
+		{771DBBAA-F20E-44B2-9219-109690E19992}.Release|x64.ActiveCfg = Release|Any CPU
+		{771DBBAA-F20E-44B2-9219-109690E19992}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

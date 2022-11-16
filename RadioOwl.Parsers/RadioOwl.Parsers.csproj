@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{771DBBAA-F20E-44B2-9219-109690E19992}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>RadioOwl.Parsers</RootNamespace>
+    <AssemblyName>RadioOwl.Parsers</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Dtc.Common, Version=1.0.15.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\VitTichy.Dtc.Common.1.0.15\lib\netstandard2.0\Dtc.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Dtc.Html, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\VitTichy.Dtc.Html.1.0.3\lib\netstandard2.0\Dtc.Html.dll</HintPath>
+    </Reference>
+    <Reference Include="Dtc.Http, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\VitTichy.Dtc.Http.1.0.5\lib\netstandard2.0\Dtc.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.8.10.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.8.10\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Data\Factory\RadioDataFactory.cs" />
+    <Compile Include="Data\Factory\RadioDataPartFactory.cs" />
+    <Compile Include="Data\Factory\RadioLogFactory.cs" />
+    <Compile Include="Data\Helper\RadioDataHelper.cs" />
+    <Compile Include="Data\Helper\RadioDataPartStateHelper.cs" />
+    <Compile Include="Data\ParserResult.cs" />
+    <Compile Include="Data\ParserResultParts.cs" />
+    <Compile Include="Data\PropertyChanged\ExpressionExtensions.cs" />
+    <Compile Include="Data\PropertyChanged\PropertyChangedBase.cs" />
+    <Compile Include="Data\RadioData.cs" />
+    <Compile Include="Data\RadioDataPart.cs" />
+    <Compile Include="Data\RadioDataPartState.cs" />
+    <Compile Include="Data\RadioLog.cs" />
+    <Compile Include="Data\RozhlasUrl.cs" />
+    <Compile Include="ParserCollection.cs" />
+    <Compile Include="Parser\Base\PageParserBase.cs" />
+    <Compile Include="Parser\Data\MujRozhlas2020SiteInfo.cs" />
+    <Compile Include="Parser\Interfaces\IPageParser.cs" />
+    <Compile Include="Parser\MujRozhlas2022Parser.cs" />
+    <Compile Include="Parser\RozhlasPrehrat2017PageParser.cs" />
+    <Compile Include="Parser\RozhlasPrehrat2018PageParser.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Data\Base\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

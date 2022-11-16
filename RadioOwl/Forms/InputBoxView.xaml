@@ -1,0 +1,38 @@
+﻿<Window x:Class="RadioOwl.Forms.InputBoxView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RadioOwl.Forms"
+        xmlns:ViewsExtension="clr-namespace:RadioOwl.Forms.Extension"
+        mc:Ignorable="d"
+        Title="{Binding Title}" 
+        Height="150" Width="400" 
+        WindowStyle="ToolWindow" 
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="15">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Image Source="/RadioOwl;component/icons/glyphicons-195-question-sign.png" Width="32" Height="32" 
+               Grid.RowSpan="2" Margin="0,5,10,0" />
+
+        <Label Name="Question" Grid.Column="1" HorizontalAlignment="Left" Padding="0,5,5,5"/> 
+        <TextBox Name="Answer" Grid.Column="1" Grid.Row="1" MinWidth="250" TabIndex="1" ViewsExtension:FocusExtension.IsFocused="True" />
+
+        <WrapPanel Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Right" Margin="0,15,0,0">
+            <Button IsDefault="True" Name="ButtonOK"  MinWidth="60" Margin="0,0,10,0" TabIndex="2">_Ok</Button>
+            <Button IsCancel="True" MinWidth="60" TabIndex="3">_Storno</Button>
+        </WrapPanel>
+    </Grid>
+
+</Window>
+
+
